@@ -420,17 +420,17 @@ install-packages-supercursor:
 	echo "🔗 シンボリックリンクを作成中..."; \
 	# SuperCursor本体へのリンク \
 	rm -rf $(HOME_DIR)/.cursor/supercursor; \
-	ln -sT $(DOTFILES_DIR)/cursor/supercursor $(HOME_DIR)/.cursor/supercursor || true; \
+	ln -sT $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor $(HOME_DIR)/.cursor/supercursor || true; \
 	# 各種ディレクトリへのリンク \
 	rm -rf $(HOME_DIR)/.cursor/commands; \
-	ln -sT $(DOTFILES_DIR)/cursor/supercursor/Commands $(HOME_DIR)/.cursor/commands || true; \
+	ln -sT $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/Commands $(HOME_DIR)/.cursor/commands || true; \
 	rm -rf $(HOME_DIR)/.cursor/core; \
-	ln -sT $(DOTFILES_DIR)/cursor/supercursor/Core $(HOME_DIR)/.cursor/core || true; \
+	ln -sT $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/Core $(HOME_DIR)/.cursor/core || true; \
 	rm -rf $(HOME_DIR)/.cursor/hooks; \
-	ln -sT $(DOTFILES_DIR)/cursor/supercursor/Hooks $(HOME_DIR)/.cursor/hooks || true; \
+	ln -sT $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/Hooks $(HOME_DIR)/.cursor/hooks || true; \
 	# 重要なファイルへの直接リンク \
 	rm -f $(HOME_DIR)/.cursor/CURSOR.md; \
-	ln -sf $(DOTFILES_DIR)/cursor/supercursor/README.md $(HOME_DIR)/.cursor/CURSOR.md || true; \
+	ln -sf $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/README.md $(HOME_DIR)/.cursor/CURSOR.md || true; \
 	\
 	echo "✅ SuperCursor フレームワークのシンボリックリンク設定が完了しました"
 
