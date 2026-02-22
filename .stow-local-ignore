@@ -7,3 +7,4 @@
 ^cursor\.mk$
 ^vscode$
 ^cursor$
+^\.gitignore$
