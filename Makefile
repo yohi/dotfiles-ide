@@ -1,3 +1,4 @@
+REPO_ROOT ?= $(CURDIR)
 .DEFAULT_GOAL := setup
 include cursor.mk
 .PHONY: setup

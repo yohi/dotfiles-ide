@@ -405,8 +405,8 @@ install-packages-supercursor:
 	@echo "ℹ️   フレームワークファイル、ペルソナ、コマンドをシンボリックリンクで構成します"
 	\
 	# 必要な変数の確認
-	if [ -z "$(DOTFILES_DIR)" ]; then \
-		echo "❌ DOTFILES_DIR is not set"; \
+	if [ -z "$(REPO_ROOT)" ]; then \
+		echo "❌ REPO_ROOT is not set"; \
 		exit 1; \
 	fi; \
 	if [ -z "$(HOME_DIR)" ]; then \

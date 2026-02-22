@@ -1,8 +1,9 @@
-Makefile
-cursor.mk
-README.md
-LICENSE
-vscode
-cursor
-.git
-AGENTS.md
+^\.git$
+^\.stow-local-ignore$
+^Makefile$
+^README\.md$
+^LICENSE$
+^AGENTS\.md$
+^cursor\.mk$
+^vscode$
+^cursor$

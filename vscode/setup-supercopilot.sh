@@ -15,10 +15,10 @@ NC='\033[0m' # No Color
 
 # 現在のディレクトリを確認
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
+REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 
 echo -e "${BLUE}SuperCopilot Framework セットアップを開始します...${NC}"
-echo -e "${YELLOW}dotfiles ディレクトリ: ${DOTFILES_DIR}${NC}"
+echo -e "${YELLOW}dotfiles ディレクトリ: ${REPO_ROOT}${NC}"
 
 # 1. .vscodeディレクトリの作成
 echo -e "\n${BLUE}1. .vscodeディレクトリを確認/作成しています...${NC}"
@@ -42,10 +42,10 @@ if [ -L "$HOME/.vscode/supercopilot" ]; then
   rm "$HOME/.vscode/supercopilot"
 fi
 
-ln -sf "$DOTFILES_DIR/vscode/settings" "$HOME/.vscode/supercopilot"
+ln -sf "$REPO_ROOT/vscode/settings" "$HOME/.vscode/supercopilot"
 if [ $? -eq 0 ]; then
   echo -e "   ${GREEN}✓ シンボリックリンクを作成しました${NC}"
-  echo -e "   ${GREEN}  $DOTFILES_DIR/vscode/settings -> $HOME/.vscode/supercopilot${NC}"
+  echo -e "   ${GREEN}  $REPO_ROOT/vscode/settings -> $HOME/.vscode/supercopilot${NC}"
 else
   echo -e "   ${RED}✗ シンボリックリンクの作成に失敗しました${NC}"
   exit 1
@@ -172,4 +172,4 @@ echo -e "  - ファイルタイプと質問内容から自動的にペルソナ�
 echo -e "  - 明示的にペルソナを指定: ${YELLOW}@architect システムの設計について教えて${NC}"
 echo -e "  - コマンドで指定: ${YELLOW}design システムアーキテクチャ${NC}"
 echo -e "\n${BLUE}詳細な使用方法はこちらをご覧ください:${NC}"
-echo -e "${YELLOW}${DOTFILES_DIR}/vscode/settings/README.md${NC}"
+echo -e "${YELLOW}${REPO_ROOT}/vscode/settings/README.md${NC}"
