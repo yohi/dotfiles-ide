@@ -7,6 +7,8 @@
 
 ```text
 dotfiles-ide/
+├── _mk/                        # Makefile sub-targets
+│   └── cursor.mk              # Cursor-specific Makefile targets
 ├── cursor/                     # Cursor editor configuration
 │   ├── CLAUDE.md               # Claude Code context for Cursor
 │   ├── commands/               # Custom command definitions
@@ -15,7 +17,6 @@ dotfiles-ide/
 │   ├── mcp.json.template       # MCP config template
 │   ├── settings.json           # Cursor settings
 │   └── supercursor/            # SuperCursor agent framework
-├── cursor.mk                   # Cursor-specific Makefile targets
 ├── vscode/                     # VS Code configuration
 │   ├── extensions.list         # Extension list
 │   ├── keybindings.json        # VS Code keybindings
@@ -29,14 +30,15 @@ dotfiles-ide/
 ## COMPONENT LAYOUT CONVENTION
 
 This repository is part of the **dotfiles polyrepo** orchestrated by `dotfiles-core`.
-All changes MUST comply with the central layout rules. Please refer to [`dotfiles-core/docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md) for the full, authoritative rules and constraints.
+All changes MUST comply with the central layout rules. Please refer to the central [ARCHITECTURE.md](https://raw.githubusercontent.com/yohi/dotfiles-core/refs/heads/master/docs/ARCHITECTURE.md) for the full, authoritative rules and constraints.
 
 ## THIS COMPONENT — SPECIAL NOTES
 
-- `cursor/` and `vscode/` are **excluded from Stow** — settings are installed via Makefile targets or manual symlink.
-- `cursor.mk` contains Cursor-specific install/setup targets, included by the root Makefile.
+- `cursor/` and `vscode/` settings are installed via Makefile targets or manual symlink.
+- `_mk/cursor.mk` contains Cursor-specific install/setup targets, included by the root Makefile.
 - IDE settings files (`settings.json`, `keybindings.json`) are managed per-editor in subdirectories.
 - `mcp.json.template` is the editable template; `mcp.json` may be generated from it.
+- Symlinks are managed explicitly via `ln -sfn` in the Makefile.
 
 ## CODE STYLE
 
