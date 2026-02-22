@@ -1,7 +1,7 @@
 REPO_ROOT ?= $(CURDIR)
 .DEFAULT_GOAL := setup
-include cursor.mk
+include _mk/cursor.mk
 .PHONY: setup
 setup:
 	@echo "==> Setting up dotfiles-ide"
-	$(MAKE) -f cursor.mk install-cursor || true
+	$(MAKE) -f _mk/cursor.mk install-cursor || true

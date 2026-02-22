@@ -4,7 +4,7 @@
 ^README\.md$
 ^LICENSE$
 ^AGENTS\.md$
-^cursor\.mk$
+^_mk$
 ^vscode$
 ^cursor$
 ^\.gitignore$
