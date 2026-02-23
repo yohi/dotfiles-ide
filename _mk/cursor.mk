@@ -476,26 +476,26 @@ install-packages-supercursor:
 		echo "❌ Source path not found: $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor"; \
 		exit 1; \
 	fi; \
-	ln -sT $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor $(HOME_DIR)/.cursor/supercursor; \
+	ln -s $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor $(HOME_DIR)/.cursor/supercursor; \
 	# 各種ディレクトリへのリンク \
 	rm -rf $(HOME_DIR)/.cursor/commands; \
 	if [ ! -d "$(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/Commands" ]; then \
 		echo "❌ Source path not found: $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/Commands"; \
 		exit 1; \
 	fi; \
-	ln -sT $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/Commands $(HOME_DIR)/.cursor/commands; \
+	ln -s $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/Commands $(HOME_DIR)/.cursor/commands; \
 	rm -rf $(HOME_DIR)/.cursor/core; \
 	if [ ! -d "$(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/Core" ]; then \
 		echo "❌ Source path not found: $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/Core"; \
 		exit 1; \
 	fi; \
-	ln -sT $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/Core $(HOME_DIR)/.cursor/core; \
+	ln -s $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/Core $(HOME_DIR)/.cursor/core; \
 	rm -rf $(HOME_DIR)/.cursor/hooks; \
 	if [ ! -d "$(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/Hooks" ]; then \
 		echo "❌ Source path not found: $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/Hooks"; \
 		exit 1; \
 	fi; \
-	ln -sT $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/Hooks $(HOME_DIR)/.cursor/hooks; \
+	ln -s $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/Hooks $(HOME_DIR)/.cursor/hooks; \
 	# 重要なファイルへの直接リンク \
 	rm -f $(HOME_DIR)/.cursor/CURSOR.md; \
 	if [ ! -f "$(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/README.md" ]; then \
