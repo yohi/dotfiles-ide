@@ -29,7 +29,7 @@ VSCodeのCopilotに関する設定を編集します。
   "github.copilot.advanced": {
     "preProcessors": {
       "chat": {
-        "path": "~/.vscode/supercopilot/supercopilot-main.js",
+        "path": "/home/your_username/.vscode/supercopilot/supercopilot-main.js",
         "function": "preprocessCopilotPrompt"
       }
     }

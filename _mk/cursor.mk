@@ -26,17 +26,16 @@ _cursor_download:
 	verify_download_size() { \
 		local min_size="$$1"; \
 		local max_size="$$2"; \
-		local file="cursor.AppImage"; \
+		local file="$${3:-cursor.AppImage}"; \
 		local file_size=$$(stat -c%s "$$file" 2>/dev/null || echo "0"); \
 		if [ "$$file_size" -ge "$$min_size" ] && [ "$$file_size" -le "$$max_size" ]; then \
 			echo "✅ サイズ検証に成功しました ($$file_size bytes)"; \
 			echo "   (範囲: $$(($$min_size/1024/1024))MB - $$(($$max_size/1024/1024))MB)"; \
 			return 0; \
 		else \
-			echo "❌ ダウンロードファイルのサイズが不正です ($$file_size bytes)"; \
+			echo "❌ ファイルのサイズが不正です ($$file_size bytes)"; \
 			echo "   許容範囲: $$(($$min_size/1024/1024))MB - $$(($$max_size/1024/1024))MB"; \
 			echo "   ファイルが破損しているか、改ざんされた可能性があります"; \
-			rm -f "$$file"; \
 			return 1; \
 		fi; \
 	}; \
@@ -69,7 +68,7 @@ _cursor_download:
 				echo "⚠️  【セキュリティ警告】SHA256チェックサム検証をスキップします (ユーザー要求)"; \
 				echo "ℹ️  TLS(HTTPS)による通信経路の保護と、ファイルサイズ検証による簡易チェックを実行します"; \
 				echo "   ダウンロード元: https://downloader.cursor.sh (TLS origin verified by curl)"; \
-				if verify_download_size 100000000 500000000; then VALID_DOWNLOAD=1; else exit 1; fi; \
+				if verify_download_size 100000000 500000000 "cursor.AppImage"; then VALID_DOWNLOAD=1; else rm -f cursor.AppImage; exit 1; fi; \
 			else \
 				echo "❌ エラー: CURSOR_SHA256 が設定されていません"; \
 				echo "   セキュリティポリシーにより、整合性検証のないインストールはブロックされました。"; \
@@ -98,15 +97,42 @@ _cursor_download:
 	FOUND=false; \
 	for DIR in $(HOME_DIR)/Downloads $(HOME_DIR)/Desktop /tmp; do \
 		if [ -d "$$DIR" ]; then \
-			CURSOR_FILE=$$(ls "$$DIR"/cursor*.AppImage 2>/dev/null | head -1); \
-			if [ -n "$$CURSOR_FILE" ]; then \
+			for CURSOR_FILE in "$$DIR"/cursor*.AppImage; do \
+				[ -f "$$CURSOR_FILE" ] || continue; \
 				echo "✅ $$CURSOR_FILE が見つかりました"; \
-				chmod +x "$$CURSOR_FILE"; \
-				sudo mkdir -p /opt/cursor; \
-				sudo cp "$$CURSOR_FILE" /opt/cursor/cursor.AppImage; \
-				FOUND=true; \
-				break; \
-			fi; \
+				VALID_FILE=0; \
+				echo "🔐 ローカルファイルの整合性を検証中 (SHA256)..."; \
+				ACTUAL_HASH=$$(sha256sum "$$CURSOR_FILE" | awk '{print $$1}'); \
+				if [ -n "$(CURSOR_SHA256)" ]; then \
+					if [ "$$ACTUAL_HASH" != "$(CURSOR_SHA256)" ]; then \
+						echo "❌ ハッシュ不一致エラー ($$CURSOR_FILE)"; \
+						echo "   期待値: $(CURSOR_SHA256)"; \
+						echo "   実際値: $$ACTUAL_HASH"; \
+					else \
+						echo "✅ ハッシュ検証に成功しました"; \
+						VALID_FILE=1; \
+					fi; \
+				else \
+					if [ "$(CURSOR_NO_VERIFY_HASH)" = "true" ]; then \
+						echo "⚠️  【セキュリティ警告】SHA256チェックサム検証をスキップします (ユーザー要求)"; \
+						if verify_download_size 100000000 500000000 "$$CURSOR_FILE"; then VALID_FILE=1; fi; \
+					else \
+						echo "❌ エラー: CURSOR_SHA256 が設定されていません"; \
+						echo "   セキュリティポリシーにより、整合性検証のないインストールはブロックされました。"; \
+					fi; \
+				fi; \
+				if [ "$$VALID_FILE" -eq 1 ]; then \
+					chmod +x "$$CURSOR_FILE"; \
+					sudo mkdir -p /opt/cursor; \
+					sudo cp "$$CURSOR_FILE" /opt/cursor/cursor.AppImage; \
+					FOUND=true; \
+					break; \
+				else \
+					echo "⏭️  $$CURSOR_FILE は検証に失敗したためスキップします"; \
+					continue; \
+				fi; \
+			done; \
+			if [ "$$FOUND" = "true" ]; then break; fi; \
 		fi; \
 	done; \
 	if [ "$$FOUND" = "false" ]; then \

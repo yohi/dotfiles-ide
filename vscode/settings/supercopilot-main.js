@@ -129,12 +129,14 @@ class SuperCopilotMain {
     const command = this.commandsHandler.detectCommand(safeUserText);
     if (command) {
       this.currentContext.lastCommand = command;
+      this.currentContext.lastPersona = null;
       return this.commandsHandler.generateCommandPrompt(command.name, safeUserText);
     }
 
     // ペルソナの自動選択
     const personaInfo = this.personaSelector.selectOptimalPersona(filePath, safeUserText);
     this.currentContext.lastPersona = personaInfo.persona;
+    this.currentContext.lastCommand = null;
 
     return this.personaSelector.generatePersonaPrompt(personaInfo);
   }

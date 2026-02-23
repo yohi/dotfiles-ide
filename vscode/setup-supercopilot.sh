@@ -13,6 +13,12 @@ BLUE='\033[0;34m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
+if [ "$EUID" -eq 0 ]; then
+  echo -e "${RED}エラー: このスクリプトは root (sudo) 権限で実行しないでください${NC}"
+  echo -e "一般ユーザーの ~/.vscode/settings.json を更新するため、通常ユーザーとして実行する必要があります。"
+  exit 1
+fi
+
 # 現在のディレクトリを確認
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
