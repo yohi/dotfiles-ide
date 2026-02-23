@@ -85,6 +85,11 @@ if command -v jq >/dev/null 2>&1; then
       # 既存ファイルのバックアップ作成
       cp "$VSCODE_SETTINGS" "${VSCODE_SETTINGS}.backup"
 
+      # VSCODE_SETTINGSが空、空白のみ、または空オブジェクトかを判定して初期化する
+      if [ ! -s "$VSCODE_SETTINGS" ] || [ -z "$(cat "$VSCODE_SETTINGS" | tr -d '[:space:]')" ] || [ "$(cat "$VSCODE_SETTINGS" | tr -d '[:space:]')" = "{}" ] || jq -e '. == {}' "$VSCODE_SETTINGS" >/dev/null 2>&1; then
+        echo "{}" > "$VSCODE_SETTINGS"
+      fi
+
       # 既存のsettings.jsonと新しい設定をマージ
       if jq --argjson config "$CONFIG_JSON" '. * $config' "$VSCODE_SETTINGS" > "${VSCODE_SETTINGS}.tmp"; then
         mv "${VSCODE_SETTINGS}.tmp" "$VSCODE_SETTINGS"

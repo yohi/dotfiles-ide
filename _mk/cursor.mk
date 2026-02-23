@@ -431,7 +431,7 @@ check-cursor-version:
 			echo "❌ 最新バージョンの確認に失敗しました"; \
 		fi; \
 	else \
-			echo "⚠️  jqがインストールされていないため、最新バージョンを確認できません"; \
+		echo "⚠️  jqがインストールされていないため、最新バージョンを確認できません"; \
 		echo "   'sudo apt install jq' でjqをインストールしてください"; \
 	fi
 
@@ -442,8 +442,7 @@ install-packages-supercursor:
 	# Cursor の確認
 	@echo "🔍 Cursor の確認中..."
 	@if ! command -v cursor >/dev/null 2>&1; then \
-		echo "ℹ️  Cursorはインストールされていますが、コマンドラインからは実行できない場合があります"; \
-		echo "   このメッセージは無視して構いません"; \
+		echo "ℹ️  Cursor コマンドが PATH に見つかりません（AppImage 等でインストールされている場合は正常です）"; \
 	else \
 		echo "✅ Cursor が見つかりました"; \
 	fi
@@ -530,7 +529,7 @@ install-packages-supercursor:
 	@echo "";
 	@echo "🎭 スマートペルソナ:"
 	@echo "   🏗️  architect   - システム設計・アーキテクチャ"
-	@echo "   🎨  developer   -実装開発"
+	@echo "   🎨 developer   - 実装開発"
 	@echo "   📊 analyst     - コード分析・評価"
 	@echo "   🧪 tester      - テスト設計・実装"
 	@echo "   🚀 devops      - インフラ・デプロイ"

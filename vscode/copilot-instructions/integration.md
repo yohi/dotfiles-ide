@@ -22,14 +22,14 @@ ln -sf "$REPO_ROOT/vscode/settings" "$HOME/.vscode/supercopilot"
 
 ### 2. Copilot設定の編集
 
-VSCodeのCopilotに関する設定を編集します。
+VSCodeのCopilotに関する設定を編集します。`path` の `<user_home>` はご自身の環境に合わせて置き換えてください（Linux: `/home/<user>`, macOS: `/Users/<user>`）。
 
 ```json
 {
   "github.copilot.advanced": {
     "preProcessors": {
       "chat": {
-        "path": "/home/your_username/.vscode/supercopilot/supercopilot-main.js",
+        "path": "<user_home>/.vscode/supercopilot/supercopilot-main.js",
         "function": "preprocessCopilotPrompt"
       }
     }
