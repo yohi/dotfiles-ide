@@ -37,6 +37,16 @@ class PersonaSelector {
   }
 
   /**
+   * 正規表現エスケープ
+   * @param {string} str - エスケープ対象の文字列
+   * @returns {string} エスケープ済み文字列
+   */
+  escapeRegExp(str) {
+    if (!str) return '';
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  /**
    * ファイルパスに基づいてペルソナを選択
    * @param {string} filePath - ファイルパス
    * @returns {Object|null} 選択されたペルソナ
@@ -123,10 +133,13 @@ class PersonaSelector {
 
       // 基本キーワードマッチング
       persona.keywordPatterns.forEach(keyword => {
-        const keywordRegex = new RegExp(`\\b${keyword}\\b`, 'i');
-        if (keywordRegex.test(queryText)) {
-          matchScores[personaKey] += 1;
-        }
+        if (!keyword) return;
+        try {
+          const keywordRegex = new RegExp(`\\b${this.escapeRegExp(keyword)}\\b`, 'i');
+          if (keywordRegex.test(queryText)) {
+            matchScores[personaKey] += 1;
+          }
+        } catch (e) { }
       });
 
       // バリアントのキーワードもチェック
@@ -135,10 +148,13 @@ class PersonaSelector {
           let variantScore = 0;
 
           variant.keywordPatterns.forEach(keyword => {
-            const keywordRegex = new RegExp(`\\b${keyword}\\b`, 'i');
-            if (keywordRegex.test(queryText)) {
-              variantScore += 1;
-            }
+            if (!keyword) return;
+            try {
+              const keywordRegex = new RegExp(`\\b${this.escapeRegExp(keyword)}\\b`, 'i');
+              if (keywordRegex.test(queryText)) {
+                variantScore += 1;
+              }
+            } catch (e) { }
           });
 
           // バリアントスコアが高い場合は記録
@@ -259,22 +275,28 @@ class PersonaSelector {
 
       // 基本キーワードマッチング
       persona.keywordPatterns.forEach(keyword => {
-        const keywordRegex = new RegExp(`\\b${keyword}\\b`, 'i');
-        if (keywordRegex.test(queryText)) {
-          matchScores[personaKey] += 1;
-          matchedKeywords[personaKey].push(keyword);
-        }
+        if (!keyword) return;
+        try {
+          const keywordRegex = new RegExp(`\\b${this.escapeRegExp(keyword)}\\b`, 'i');
+          if (keywordRegex.test(queryText)) {
+            matchScores[personaKey] += 1;
+            matchedKeywords[personaKey].push(keyword);
+          }
+        } catch (e) { }
       });
 
       // バリアントのキーワードもチェック
       if (persona.variants) {
         for (const [variantKey, variant] of Object.entries(persona.variants)) {
           variant.keywordPatterns.forEach(keyword => {
-            const keywordRegex = new RegExp(`\\b${keyword}\\b`, 'i');
-            if (keywordRegex.test(queryText)) {
-              matchScores[personaKey] += 1;
-              matchedKeywords[personaKey].push(keyword);
-            }
+            if (!keyword) return;
+            try {
+              const keywordRegex = new RegExp(`\\b${this.escapeRegExp(keyword)}\\b`, 'i');
+              if (keywordRegex.test(queryText)) {
+                matchScores[personaKey] += 1;
+                matchedKeywords[personaKey].push(keyword);
+              }
+            } catch (e) { }
           });
         }
       }

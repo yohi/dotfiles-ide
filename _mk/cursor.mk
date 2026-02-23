@@ -159,6 +159,7 @@ _cursor_setup_desktop:
 						sudo mkdir -p /usr/share/pixmaps; \
 						sudo cp "$$ICON_FILE" /usr/share/pixmaps/cursor.png; \
 						ICON_PATH="/usr/share/pixmaps/cursor.png"; \
+						ICON_EXTRACTED=true; \
 						echo "✅ AppImageからアイコンを抽出しました: $$ICON_FILE"; \
 					fi; \
 				fi; \
@@ -276,6 +277,22 @@ update-cursor:
 			FILE_SIZE=$$(stat -c%s cursor-new.AppImage 2>/dev/null || echo "0"); \
 			if [ "$$FILE_SIZE" -ge 100000000 ] && [ "$$FILE_SIZE" -le 500000000 ]; then \
 				echo "✅ 新しいバージョンのダウンロードが完了しました (サイズ: $$FILE_SIZE bytes)"; \
+				ACTUAL_HASH=$$(sha256sum cursor-new.AppImage | awk '{print $$1}'); \
+				if [ -n "$(CURSOR_SHA256)" ]; then \
+					if [ "$$ACTUAL_HASH" != "$(CURSOR_SHA256)" ]; then \
+						echo "❌ ハッシュ不一致エラー"; \
+						echo "   期待値: $(CURSOR_SHA256)"; \
+						echo "   実際値: $$ACTUAL_HASH"; \
+						rm -f cursor-new.AppImage; \
+						exit 1; \
+					fi; \
+				elif [ "$(CURSOR_NO_VERIFY_HASH)" != "true" ]; then \
+					echo "❌ エラー: CURSOR_SHA256 が設定されていません"; \
+					echo "   セキュリティポリシーにより、整合性検証のないアップデートはブロックされます。"; \
+					echo "   CURSOR_NO_VERIFY_HASH=true でスキップできます。"; \
+					rm -f cursor-new.AppImage; \
+					exit 1; \
+				fi; \
 				echo "🔧 既存ファイルをバックアップ中..."; \
 				sudo cp /opt/cursor/cursor.AppImage /opt/cursor/cursor.AppImage.backup.$$(date +%Y%m%d_%H%M%S) && \
 				chmod +x cursor-new.AppImage && \

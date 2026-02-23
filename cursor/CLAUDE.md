@@ -10,7 +10,7 @@ This repository contains Cursor IDE configuration files and custom slash command
 
 ### Configuration Structure
 
-```
+```text
 cursor/
 ├── settings.json           # Cursor IDE settings
 ├── keybindings.json       # Custom keybindings
@@ -30,6 +30,7 @@ cursor/
 This repository manages multiple MCP server configurations:
 
 **Primary Configuration** (`mcp.json`):
+
 - Bitbucket MCP (Git SSH integration)
 - Playwright (Browser automation)
 - Atlassian (Jira/Confluence integration)
@@ -40,11 +41,13 @@ This repository manages multiple MCP server configurations:
 - Chrome DevTools MCP
 
 **Template Configuration** (`mcp.json.template`):
+
 - Node-based local server installations
 - Environment variable placeholders
 - Additional AWS MCP servers (Core, Pricing)
 
 **Docker Gateway** (`mcp-docker.json`):
+
 - Unified Docker MCP Gateway
 - Environment secrets via `.env` file
 
@@ -55,18 +58,21 @@ This repository manages multiple MCP server configurations:
 AI-powered code review commands requiring [CodeRabbit CLI](https://docs.coderabbit.ai/cli/overview):
 
 **Installation**:
+
 ```bash
 curl -fsSL https://cli.coderabbit.ai/install.sh | sh
 coderabbit auth login
 ```
 
 **Available Commands**:
+
 - `/coderabbit-review` - Comprehensive code review (all files)
 - `/quick-cr-review` - Fast review of uncommitted changes only
 - `/security-cr-audit` - Security vulnerability audit
 - `/performance-cr-review` - Performance optimization analysis
 
 **Common Usage Patterns**:
+
 ```bash
 # Daily development cycle
 /quick-cr-review              # Before commit
@@ -87,6 +93,7 @@ coderabbit auth login
 Specification-driven development workflow commands:
 
 **Workflow Commands**:
+
 - `/kiro:steering` - Create/update project steering documents
 - `/kiro:steering-custom` - Create custom steering for specialized contexts
 - `/kiro:spec-init [description]` - Initialize new specification
@@ -99,6 +106,7 @@ Specification-driven development workflow commands:
 - `/kiro:validate-design [feature]` - Interactive technical design review
 
 **Development Workflow**:
+
 1. (Optional) `/kiro:steering` - Set project context
 2. `/kiro:spec-init` - Initialize specification
 3. `/kiro:spec-requirements` - Define requirements
@@ -112,6 +120,7 @@ Specification-driven development workflow commands:
 The SuperCursor framework (gitignored but documented here for reference) provides enhanced Cursor capabilities:
 
 **Core Commands**:
+
 - Analysis: `/sc:analyze`, `/sc:explain`
 - Development: `/sc:implement`, `/sc:refactor`, `/sc:debug`
 - Design: `/sc:design`, `/sc:document`
@@ -123,6 +132,7 @@ The SuperCursor framework (gitignored but documented here for reference) provide
 **Personas**: `@architect`, `@analyst`, `@developer`, `@tester`, `@devops`
 
 **Installation** (if needed):
+
 ```bash
 cd cursor/supercursor
 python -m supercursor install [--interactive|--minimal|--profile developer]
@@ -133,6 +143,7 @@ python -m supercursor install [--interactive|--minimal|--profile developer]
 ### MCP Server Configuration
 
 **Switching Between Configurations**:
+
 ```bash
 # Use template configuration (local Node-based servers)
 cp mcp.json.template mcp.json
@@ -145,12 +156,14 @@ cp mcp-docker.json mcp.json
 ```
 
 **Adding New MCP Servers**:
+
 1. Add entry to `mcp.json` with appropriate command and args
 2. Configure environment variables (use placeholders like `YOUR_*_HERE`)
 3. Update `mcp.json.template` to document the configuration
 4. Test with `disabled: false` flag
 
 **Environment Variables**:
+
 - Store sensitive values in `.env` file (for docker-mcp-gateway)
 - Use environment variable placeholders in configurations
 - Never commit actual API keys or tokens
@@ -158,12 +171,13 @@ cp mcp-docker.json mcp.json
 ### Settings Synchronization
 
 Key settings in `settings.json`:
+
 - Editor: 4 spaces (Python), 2 spaces (JS/TS/JSON/YAML)
 - Format on save enabled for all languages
 - Font: Cica Nerd Font with Noto Sans CJK JP fallback
 - Git: Smart commit enabled, auto-fetch on
 - Python: Black formatter, flake8+mypy linting
-- Search excludes: node_modules, .git, dist, build, .venv, __pycache__, .cursor
+- Search excludes: node_modules, .git, dist, build, .venv, **pycache**, .cursor
 
 ## Development Patterns
 
@@ -187,6 +201,7 @@ The Kiro workflow enforces phased development:
 5. **Implementation Phase**: Execute tasks with TDD methodology
 
 **Approval Gates**:
+
 - Design requires approved requirements
 - Tasks require approved design
 - Each phase requires human review before proceeding

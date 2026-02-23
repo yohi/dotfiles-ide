@@ -5,7 +5,7 @@ include _mk/cursor.mk
 .PHONY: setup
 setup:
 	@echo "==> Setting up dotfiles-ide"
-	$(MAKE) -f _mk/cursor.mk install-cursor || true
+	$(MAKE) -f _mk/cursor.mk install-cursor
 
 .PHONY: link
 link:

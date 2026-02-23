@@ -43,11 +43,11 @@ vscode/settings/
 # ホームディレクトリの.vscodeフォルダを作成（存在しない場合）
 mkdir -p ~/.vscode
 
-# シンボリックリンクを作成
-ln -sf ~/dotfiles/vscode/settings ~/.vscode/supercopilot
+# リポジトリルートから以下のコマンドを実行し、シンボリックリンクを作成
+ln -sf $(pwd)/vscode/settings ~/.vscode/supercopilot
 ```
 
-2. **VSCodeの設定に追加**
+1. **VSCodeの設定に追加**
 
 `settings.json`ファイルに以下の設定を追加します：
 
@@ -77,25 +77,30 @@ ln -sf ~/dotfiles/vscode/settings ~/.vscode/supercopilot
 ## コマンド一覧
 
 ### 分析系コマンド
+
 - **analyze**: コード分析、問題特定、改善提案
 - **explain**: コードの動作説明、アルゴリズム解説
 - **troubleshoot**: バグ解析、エラー原因特定、解決策提示
 
 ### 開発系コマンド
+
 - **implement**: 機能実装、新規開発
 - **improve**: リファクタリング、最適化
 - **build**: ビルド、コンパイル、パッケージング
 
 ### 設計系コマンド
+
 - **design**: アーキテクチャ設計、システム設計
 - **estimate**: 作業工数見積もり、スケジュール算出
 
 ### 管理系コマンド
+
 - **task**: タスク分解、作業計画
 - **workflow**: ワークフロー設計、プロセス改善
 - **document**: ドキュメント生成、仕様書作成
 
 ### ツール系コマンド
+
 - **test**: テスト作成、テスト実行計画
 - **git**: Git操作、ブランチ戦略
 - **cleanup**: コード整理、不要ファイル削除

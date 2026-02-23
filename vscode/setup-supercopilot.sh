@@ -37,9 +37,14 @@ fi
 
 # 2. シンボリックリンクの作成
 echo -e "\n${BLUE}2. SuperCopilot設定のシンボリックリンクを作成しています...${NC}"
-if [ -L "$HOME/.vscode/supercopilot" ]; then
-  echo -e "   ${YELLOW}既存のシンボリックリンクを削除します${NC}"
-  rm "$HOME/.vscode/supercopilot"
+if [ -e "$HOME/.vscode/supercopilot" ]; then
+  if ! [ -L "$HOME/.vscode/supercopilot" ]; then
+    echo -e "   ${YELLOW}既存のファイル/ディレクトリをバックアップします${NC}"
+    mv "$HOME/.vscode/supercopilot" "$HOME/.vscode/supercopilot.bak.$(date +%s)"
+  else
+    echo -e "   ${YELLOW}既存のシンボリックリンクを削除します${NC}"
+    rm "$HOME/.vscode/supercopilot"
+  fi
 fi
 
 ln -sf "$REPO_ROOT/vscode/settings" "$HOME/.vscode/supercopilot"
@@ -70,6 +75,9 @@ if command -v jq >/dev/null 2>&1; then
     else
       echo -e "   ${YELLOW}SuperCopilot設定を追加します...${NC}"
 
+      # 既存ファイルのバックアップ作成
+      cp "$VSCODE_SETTINGS" "${VSCODE_SETTINGS}.backup"
+
       # 既存のsettings.jsonと新しい設定をマージ
       if jq --argjson config "$CONFIG_JSON" '. * $config' "$VSCODE_SETTINGS" > "${VSCODE_SETTINGS}.tmp"; then
         mv "${VSCODE_SETTINGS}.tmp" "$VSCODE_SETTINGS"
@@ -77,6 +85,7 @@ if command -v jq >/dev/null 2>&1; then
         # JSON構文の検証
         if jq empty "$VSCODE_SETTINGS" >/dev/null 2>&1; then
           echo -e "   ${GREEN}✓ settings.jsonに設定を追加しました${NC}"
+          rm -f "${VSCODE_SETTINGS}.backup"
         else
           echo -e "   ${RED}✗ JSON構文エラーが発生しました。設定を復元します${NC}"
           # バックアップがあれば復元
@@ -117,12 +126,17 @@ else
       echo -e "   ${YELLOW}SuperCopilot設定を追加します...${NC}"
 
       # settings.jsonの末尾の閉じ括弧の前に設定を挿入
-      # 空のファイルまたは内容がない場合
+      # 空のファイルまたは内容がない場合、もしくは "{}" のみのファイル
       if [ ! -s "$VSCODE_SETTINGS" ] || [ "$(cat "$VSCODE_SETTINGS" | tr -d '[:space:]')" = "" ]; then
         echo "{" > "$VSCODE_SETTINGS"
         echo "  $CONFIG_ENTRY" >> "$VSCODE_SETTINGS"
         echo "}" >> "$VSCODE_SETTINGS"
         echo -e "   ${GREEN}✓ 新しいsettings.jsonファイルを作成しました${NC}"
+      elif [ "$(cat "$VSCODE_SETTINGS" | tr -d '[:space:]')" = "{}" ]; then
+        echo "{" > "$VSCODE_SETTINGS"
+        echo "  $CONFIG_ENTRY" >> "$VSCODE_SETTINGS"
+        echo "}" >> "$VSCODE_SETTINGS"
+        echo -e "   ${GREEN}✓ settings.jsonに設定を追加しました${NC}"
       else
         # 末尾が}で終わるか確認
         if grep -q "}" "$VSCODE_SETTINGS"; then

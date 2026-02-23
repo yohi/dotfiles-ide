@@ -29,7 +29,7 @@ cr auth login
 **実行される CodeRabbit CLI コマンド**:
 - `coderabbit --prompt-only` (AI統合最適化)
 - `coderabbit --plain` (詳細フィードバック)
-- `coderabbit --base main --prompt-only` (ベース比較)
+- `coderabbit --base master --prompt-only` (ベース比較)
 
 **特徴**:
 - 全ファイルの包括的分析
@@ -44,7 +44,7 @@ cr auth login
 **実行される CodeRabbit CLI コマンド**:
 - `coderabbit --type uncommitted --prompt-only` (未コミット変更)
 - `coderabbit --type all --plain` (詳細確認)
-- `coderabbit --base main --type uncommitted --prompt-only` (差分レビュー)
+- `coderabbit --base master --type uncommitted --prompt-only` (差分レビュー)
 
 **特徴**:
 - Git差分ベースの効率的スキャン
@@ -79,7 +79,7 @@ cr auth login
 **実行される CodeRabbit CLI コマンド**:
 - `coderabbit --prompt-only` (AI統合最適化)
 - `coderabbit --plain --type all` (詳細分析)
-- `coderabbit --base main --prompt-only` (差分チェック)
+- `coderabbit --base master --prompt-only` (差分チェック)
 
 **特徴**:
 - 定量的メトリクスによる性能分析
@@ -103,7 +103,7 @@ cr auth login
 
 ### 3. ベースブランチ指定
 ```bash
---base main     # mainブランチとの比較
+--base master   # masterブランチとの比較
 --base develop  # developブランチとの比較
 --base master   # masterブランチとの比較
 ```

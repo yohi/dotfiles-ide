@@ -29,14 +29,29 @@ vscode/
 ### 基本設定のシンボリックリンク
 
 以下のコマンドを実行して、VSCodeの設定とキーバインドのシンボリックリンクを作成します。
+なお、VSCodeの標準的なユーザー設定フォルダはOSによって異なります：
+
+- macOS: `~/Library/Application Support/Code/User`
+- Linux: `~/.config/Code/User`
+- Windows: `%APPDATA%\Code\User`
+
+システム標準の場所にリンクを作成する場合は、以下のコマンドをOSに合わせて実行してください（例はLinuxの場合）：
 
 ```bash
-# .vscodeディレクトリが存在しない場合は作成
-mkdir -p ~/.vscode
+# OS標準のUserディレクトリを作成（存在しない場合）
+mkdir -p ~/.config/Code/User
 
-# 設定ファイルのシンボリックリンクを作成
-ln -sf ~/dotfiles/vscode/settings.json ~/.vscode/settings.json
-ln -sf ~/dotfiles/vscode/keybindings.json ~/.vscode/keybindings.json
+# 設定ファイルのシンボリックリンクを作成（リポジトリルートで実行）
+ln -sf $(pwd)/vscode/settings.json ~/.config/Code/User/settings.json
+ln -sf $(pwd)/vscode/keybindings.json ~/.config/Code/User/keybindings.json
+```
+
+または、ポータブルな設定として `~/.vscode` を使用している特別な理由がある場合（例えばエディタの起動スクリプトで独自の `--user-data-dir` を指定している場合）は、以下のようにします：
+
+```bash
+mkdir -p ~/.vscode
+ln -sf $(pwd)/vscode/settings.json ~/.vscode/settings.json
+ln -sf $(pwd)/vscode/keybindings.json ~/.vscode/keybindings.json
 ```
 
 ### 拡張機能のインストール

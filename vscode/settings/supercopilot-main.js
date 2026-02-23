@@ -85,6 +85,8 @@ class SuperCopilotMain {
       if (contextInfo.filePath) {
         const fileExtMatch = contextInfo.filePath.match(/\.([^.]+)$/);
         this.currentContext.fileType = fileExtMatch ? fileExtMatch[1] : '';
+      } else {
+        this.currentContext.fileType = '';
       }
     }
 
