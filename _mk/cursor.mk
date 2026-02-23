@@ -9,6 +9,13 @@
 # CURSOR_NO_VERIFY_HASH=true を指定しない限りエラーとなります（セキュリティ強化）
 CURSOR_SHA256 :=
 
+# Cursor AppImageのサイズ制限 (bytes)
+# 期待されるサイズ範囲: 約100MB〜500MB
+CURSOR_MIN_SIZE_BYTES := 100000000
+CURSOR_MAX_SIZE_BYTES := 500000000
+# MB換算用定数 (1024 * 1024)
+BYTES_TO_MB := 1048576
+
 # Cursor IDEのインストール
 install-packages-cursor:
 	@echo "📝 Cursor IDEのインストールを開始します..."
@@ -24,17 +31,17 @@ _cursor_download:
 	@echo "📦 方法1: 自動ダウンロードを試行中..."
 	@cd /tmp && \
 	verify_download_size() { \
-		local min_size="$$1"; \
-		local max_size="$$2"; \
+		local min_size="$${1:-$(CURSOR_MIN_SIZE_BYTES)}"; \
+		local max_size="$${2:-$(CURSOR_MAX_SIZE_BYTES)}"; \
 		local file="$${3:-cursor.AppImage}"; \
 		local file_size=$$(stat -c%s "$$file" 2>/dev/null || echo "0"); \
 		if [ "$$file_size" -ge "$$min_size" ] && [ "$$file_size" -le "$$max_size" ]; then \
 			echo "✅ サイズ検証に成功しました ($$file_size bytes)"; \
-			echo "   (範囲: $$(($$min_size/1024/1024))MB - $$(($$max_size/1024/1024))MB)"; \
+			echo "   (範囲: $$(($$min_size/$(BYTES_TO_MB)))MB - $$(($$max_size/$(BYTES_TO_MB)))MB)"; \
 			return 0; \
 		else \
 			echo "❌ ファイルのサイズが不正です ($$file_size bytes)"; \
-			echo "   許容範囲: $$(($$min_size/1024/1024))MB - $$(($$max_size/1024/1024))MB"; \
+			echo "   許容範囲: $$(($$min_size/$(BYTES_TO_MB)))MB - $$(($$max_size/$(BYTES_TO_MB)))MB"; \
 			echo "   ファイルが破損しているか、改ざんされた可能性があります"; \
 			return 1; \
 		fi; \
@@ -68,7 +75,7 @@ _cursor_download:
 				echo "⚠️  【セキュリティ警告】SHA256チェックサム検証をスキップします (ユーザー要求)"; \
 				echo "ℹ️  TLS(HTTPS)による通信経路の保護と、ファイルサイズ検証による簡易チェックを実行します"; \
 				echo "   ダウンロード元: https://downloader.cursor.sh (TLS origin verified by curl)"; \
-				if verify_download_size 100000000 500000000 "cursor.AppImage"; then VALID_DOWNLOAD=1; else rm -f cursor.AppImage; exit 1; fi; \
+				if verify_download_size "$(CURSOR_MIN_SIZE_BYTES)" "$(CURSOR_MAX_SIZE_BYTES)" "cursor.AppImage"; then VALID_DOWNLOAD=1; else rm -f cursor.AppImage; exit 1; fi; \
 			else \
 				echo "❌ エラー: CURSOR_SHA256 が設定されていません"; \
 				echo "   セキュリティポリシーにより、整合性検証のないインストールはブロックされました。"; \
@@ -115,7 +122,7 @@ _cursor_download:
 				else \
 					if [ "$(CURSOR_NO_VERIFY_HASH)" = "true" ]; then \
 						echo "⚠️  【セキュリティ警告】SHA256チェックサム検証をスキップします (ユーザー要求)"; \
-						if verify_download_size 100000000 500000000 "$$CURSOR_FILE"; then VALID_FILE=1; fi; \
+						if verify_download_size "$(CURSOR_MIN_SIZE_BYTES)" "$(CURSOR_MAX_SIZE_BYTES)" "$$CURSOR_FILE"; then VALID_FILE=1; fi; \
 					else \
 						echo "❌ エラー: CURSOR_SHA256 が設定されていません"; \
 						echo "   セキュリティポリシーにより、整合性検証のないインストールはブロックされました。"; \
@@ -301,7 +308,7 @@ update-cursor:
 			--max-time 120 --retry 3 --retry-delay 5 \
 			-o cursor-new.AppImage "$$DOWNLOAD_URL" 2>/dev/null; then \
 			FILE_SIZE=$$(stat -c%s cursor-new.AppImage 2>/dev/null || echo "0"); \
-			if [ "$$FILE_SIZE" -ge 100000000 ] && [ "$$FILE_SIZE" -le 500000000 ]; then \
+			if [ "$$FILE_SIZE" -ge $(CURSOR_MIN_SIZE_BYTES) ] && [ "$$FILE_SIZE" -le $(CURSOR_MAX_SIZE_BYTES) ]; then \
 				echo "✅ 新しいバージョンのダウンロードが完了しました (サイズ: $$FILE_SIZE bytes)"; \
 				ACTUAL_HASH=$$(sha256sum cursor-new.AppImage | awk '{print $$1}'); \
 				if [ -n "$(CURSOR_SHA256)" ]; then \
@@ -329,7 +336,8 @@ update-cursor:
 				CURSOR_UPDATED=true && \
 				echo "🎉 Cursor IDEのアップデートが完了しました"; \
 			else \
-				echo "❌ ダウンロードファイルが不完全です (サイズ: $$FILE_SIZE bytes)"; \
+				echo "❌ ダウンロードファイルが不完全または不正なサイズです ($$FILE_SIZE bytes)"; \
+				echo "   許容範囲: $$(($(CURSOR_MIN_SIZE_BYTES)/$(BYTES_TO_MB)))MB - $$(($(CURSOR_MAX_SIZE_BYTES)/$(BYTES_TO_MB)))MB"; \
 				rm -f cursor-new.AppImage 2>/dev/null; \
 			fi; \
 		else \
