@@ -501,56 +501,56 @@ install-packages-supercursor:
 	@echo "ℹ️   フレームワークファイル、ペルソナ、コマンドをシンボリックリンクで構成します"
 	\
 	# 必要な変数の確認
-	if [ -z "$(REPO_ROOT)" ]; then \
+	if [ -z "${REPO_ROOT}" ]; then \
 		echo "❌ REPO_ROOT is not set"; \
 		exit 1; \
 	fi; \
-	if [ -z "$(HOME_DIR)" ]; then \
+	if [ -z "${HOME_DIR}" ]; then \
 		echo "❌ HOME_DIR is not set"; \
 		exit 1; \
 	fi; \
-	if [ -z "$(DOTFILES_SHELL_ROOT)" ] || [ ! -d "$(DOTFILES_SHELL_ROOT)" ]; then \
-		echo "❌ DOTFILES_SHELL_ROOT is not set or not a directory: $(DOTFILES_SHELL_ROOT)"; \
+	if [ -z "${DOTFILES_SHELL_ROOT}" ] || [ ! -d "${DOTFILES_SHELL_ROOT}" ]; then \
+		echo "❌ DOTFILES_SHELL_ROOT is not set or not a directory: ${DOTFILES_SHELL_ROOT}"; \
 		exit 1; \
 	fi; \
 	\
 	echo "📁 必要なディレクトリを作成中..."; \
-	mkdir -p $(HOME_DIR)/.cursor/; \
+	mkdir -p "${HOME_DIR}/.cursor"; \
 	\
 	echo "🔗 シンボリックリンクを作成中..."; \
 	# SuperCursor本体へのリンク \
-	rm -rf $(HOME_DIR)/.cursor/supercursor; \
-	if [ ! -d "$(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor" ]; then \
-		echo "❌ Source path not found: $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor"; \
+	rm -rf "${HOME_DIR}/.cursor/supercursor"; \
+	if [ ! -d "${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor" ]; then \
+		echo "❌ Source path not found: ${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor"; \
 		exit 1; \
 	fi; \
-	ln -s $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor $(HOME_DIR)/.cursor/supercursor; \
+	ln -s "${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor" "${HOME_DIR}/.cursor/supercursor"; \
 	# 各種ディレクトリへのリンク \
-	rm -rf $(HOME_DIR)/.cursor/commands; \
-	if [ ! -d "$(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/Commands" ]; then \
-		echo "❌ Source path not found: $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/Commands"; \
+	rm -rf "${HOME_DIR}/.cursor/commands"; \
+	if [ ! -d "${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor/Commands" ]; then \
+		echo "❌ Source path not found: ${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor/Commands"; \
 		exit 1; \
 	fi; \
-	ln -s $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/Commands $(HOME_DIR)/.cursor/commands; \
-	rm -rf $(HOME_DIR)/.cursor/core; \
-	if [ ! -d "$(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/Core" ]; then \
-		echo "❌ Source path not found: $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/Core"; \
+	ln -s "${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor/Commands" "${HOME_DIR}/.cursor/commands"; \
+	rm -rf "${HOME_DIR}/.cursor/core"; \
+	if [ ! -d "${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor/Core" ]; then \
+		echo "❌ Source path not found: ${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor/Core"; \
 		exit 1; \
 	fi; \
-	ln -s $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/Core $(HOME_DIR)/.cursor/core; \
-	rm -rf $(HOME_DIR)/.cursor/hooks; \
-	if [ ! -d "$(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/Hooks" ]; then \
-		echo "❌ Source path not found: $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/Hooks"; \
+	ln -s "${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor/Core" "${HOME_DIR}/.cursor/core"; \
+	rm -rf "${HOME_DIR}/.cursor/hooks"; \
+	if [ ! -d "${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor/Hooks" ]; then \
+		echo "❌ Source path not found: ${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor/Hooks"; \
 		exit 1; \
 	fi; \
-	ln -s $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/Hooks $(HOME_DIR)/.cursor/hooks; \
+	ln -s "${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor/Hooks" "${HOME_DIR}/.cursor/hooks"; \
 	# 重要なファイルへの直接リンク \
-	rm -f $(HOME_DIR)/.cursor/CURSOR.md; \
-	if [ ! -f "$(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/README.md" ]; then \
-		echo "❌ Source file not found: $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/README.md"; \
+	rm -f "${HOME_DIR}/.cursor/CURSOR.md"; \
+	if [ ! -f "${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor/README.md" ]; then \
+		echo "❌ Source file not found: ${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor/README.md"; \
 		exit 1; \
 	fi; \
-	ln -sf $(DOTFILES_SHELL_ROOT)/dotfiles-ide/cursor/supercursor/README.md $(HOME_DIR)/.cursor/CURSOR.md; \
+	ln -sf "${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor/README.md" "${HOME_DIR}/.cursor/CURSOR.md"; \
 	\
 	echo "✅ SuperCursor フレームワークのシンボリックリンク設定が完了しました"
 
