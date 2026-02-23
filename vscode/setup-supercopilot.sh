@@ -165,11 +165,24 @@ else
             exit 1
           fi
         else
-          # JSONが不完全な場合、単純に追加
-          echo "," >> "$VSCODE_SETTINGS"
-          echo "  $CONFIG_ENTRY" >> "$VSCODE_SETTINGS"
-          echo "}" >> "$VSCODE_SETTINGS"
-          echo -e "   ${GREEN}✓ settings.jsonに設定を追加しました${NC}"
+          # JSONが不完全な場合（} が見つからない）
+          cp "$VSCODE_SETTINGS" "$VSCODE_SETTINGS.bak"
+          echo -e "   ${YELLOW}警告: '}' が見つからないため VSCODE_SETTINGS ($VSCODE_SETTINGS) は不正な JSON の可能性があります。${NC}"
+          echo -e "   ${YELLOW}バックアップを $VSCODE_SETTINGS.bak に作成しました。${NC}"
+          
+          # parse attempt (use jq if available)
+          if command -v jq >/dev/null 2>&1 && jq empty "$VSCODE_SETTINGS" >/dev/null 2>&1; then
+            # jq is available and parsing succeeded, which is unexpected if no } found,
+            # but we still shouldn't append blindly if we can't find '}' with grep.
+            echo -e "   ${RED}✗ ファイル末尾を特定できないため自動追記を中止しました。手動で以下の CONFIG_ENTRY を追加してください:${NC}"
+            echo -e "   ${YELLOW}$CONFIG_ENTRY${NC}"
+            exit 1
+          else
+            # parsing fails or jq unavailable
+            echo -e "   ${RED}✗ ファイルのパースに失敗しました。VSCODE_SETTINGS を手動で修正し、以下の CONFIG_ENTRY を設定してください:${NC}"
+            echo -e "   ${YELLOW}$CONFIG_ENTRY${NC}"
+            exit 1
+          fi
         fi
       fi
     fi

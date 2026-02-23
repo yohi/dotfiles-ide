@@ -393,6 +393,12 @@ check-cursor-version:
 		echo "📋 インストール済みバージョンを確認中..."; \
 		CURRENT_VERSION="不明"; \
 		if command -v strings >/dev/null 2>&1; then \
+			# 暫定対応: バイナリからstringsを使ってバージョンを直接抽出していますが、 \
+			# 類似の文字列を拾って不正確になる可能性があります。 \
+			# TODO: 将来的にはCursorのAPIから直接現在のインストール版バージョンを問い合わせる \
+			# もしくは公式のCLIコマンドによるバージョン出力処理に置き換えてください。 \
+			# (精度の向上案としては、stringsの先頭ではなく特定のプレフィックスがある箇所を探すか、 \
+			# AppImage内の.desktopファイルやpackage.jsonを抽出して確認する方法があります) \
 			VERSION_STR=$$(strings /opt/cursor/cursor.AppImage | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$$' | head -1 2>/dev/null || echo ""); \
 			if [ -n "$$VERSION_STR" ]; then \
 				CURRENT_VERSION="$$VERSION_STR"; \
@@ -524,7 +530,7 @@ install-packages-supercursor:
 	@echo "";
 	@echo "🎭 スマートペルソナ:"
 	@echo "   🏗️  architect   - システム設計・アーキテクチャ"
-	@echo "   🎨 developer   -実装開発"
+	@echo "   🎨  developer   -実装開発"
 	@echo "   📊 analyst     - コード分析・評価"
 	@echo "   🧪 tester      - テスト設計・実装"
 	@echo "   🚀 devops      - インフラ・デプロイ"

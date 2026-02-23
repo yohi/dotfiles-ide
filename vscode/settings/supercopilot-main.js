@@ -214,10 +214,27 @@ class SuperCopilotMain {
       // シングルトンインスタンスの取得
       if (!SuperCopilotMain._instance) {
         SuperCopilotMain._instance = new SuperCopilotMain();
-        SuperCopilotMain._instance.initialize();
+        try {
+          const success = SuperCopilotMain._instance.initialize();
+          if (!success) {
+            throw new Error('SuperCopilot initialization returned false');
+          }
+        } catch (initError) {
+          const isProduction = process.env.NODE_ENV === 'production' || process.env.VSCODE_ENV === 'production';
+          if (isProduction) {
+            console.error('[SuperCopilot] Initialization failed');
+          } else {
+            console.error(`[SuperCopilot] Initialization error: ${initError.message}`);
+            if (initError.stack) console.debug('[SuperCopilot] Init error stack:', initError.stack);
+          }
+          return userText;
+        }
       }
 
       const instance = SuperCopilotMain._instance;
+      if (!instance.initialized) {
+        return userText;
+      }
       return instance.processUserInput(userText, context.filePath || '');
     } catch (error) {
       // 環境ベースのロギング：プロダクション環境では詳細なエラー情報を非表示
@@ -228,7 +245,9 @@ class SuperCopilotMain {
         console.error('[SuperCopilot] An error occurred during preprocessing');
       } else {
         console.error(`[SuperCopilot] Preprocessing error: ${error.message}`);
-        console.debug('[SuperCopilot] Error stack:', error.stack);
+        if (error.stack) {
+          console.debug('[SuperCopilot] Error stack:', error.stack);
+        }
       }
 
       return userText; // エラー時は元のテキストをそのまま返す
