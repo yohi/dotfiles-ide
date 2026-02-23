@@ -13,11 +13,11 @@ SuperCopilot Frameworkのファイルは、VSCodeの設定ディレクトリか�
 
 ```bash
 # ホームディレクトリの.vscodeフォルダを作成（存在しない場合）
-mkdir -p ~/.vscode
+mkdir -p "$HOME/.vscode"
 
 # 環境変数などを利用してリポジトリルートを指定し、シンボリックリンクを作成
 # 実行前にリポジトリルートを設定してください (例: export REPO_ROOT="$(pwd)")
-ln -sf $REPO_ROOT/vscode/settings ~/.vscode/supercopilot
+ln -sf "$REPO_ROOT/vscode/settings" "$HOME/.vscode/supercopilot"
 ```
 
 ### 2. Copilot設定の編集
@@ -102,11 +102,11 @@ install_supercopilot() {
   echo "SuperCopilot Frameworkをセットアップしています..."
 
   # .vscodeディレクトリが存在しない場合は作成
-  mkdir -p ~/.vscode
+  mkdir -p "$HOME/.vscode"
 
   # スクリプトのディレクトリからリポジトリルートを計算してシンボリックリンクを作成
   local REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-  ln -sf "$REPO_ROOT/vscode/settings" ~/.vscode/supercopilot
+  ln -sf "$REPO_ROOT/vscode/settings" "$HOME/.vscode/supercopilot"
 
   echo "SuperCopilot Frameworkのセットアップが完了しました"
   echo "VSCodeのsettings.jsonに設定を追加してください"

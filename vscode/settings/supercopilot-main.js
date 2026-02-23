@@ -58,6 +58,7 @@ class SuperCopilotMain {
       // 設定の確認
       if (!this.config || !this.config.personas || !this.config.commands) {
         this.log('error', 'Configuration is invalid');
+        this.initialized = false;
         return false;
       }
 
@@ -66,6 +67,7 @@ class SuperCopilotMain {
       return true;
     } catch (error) {
       this.log('error', `Initialization failed: ${error.message}`);
+      this.initialized = false;
       return false;
     }
   }
@@ -101,26 +103,37 @@ class SuperCopilotMain {
    * @param {string} filePath - 現在のファイルパス
    * @returns {string} 生成されたプロンプト
    */
-  processUserInput(userText, filePath = '') {
+  processUserInput(userText = '', filePath = '') {
+    // ユーザーテキストの安全なデフォルト化
+    const safeUserText = userText || '';
+
     if (!this.initialized) {
-      this.initialize();
+      try {
+        const success = this.initialize();
+        if (!success || !this.initialized) {
+          return safeUserText;
+        }
+      } catch (error) {
+        this.initialized = false;
+        return safeUserText;
+      }
     }
 
     // コンテキスト更新
     this.updateContext({
-      userQuery: userText,
+      userQuery: safeUserText,
       filePath: filePath
     });
 
     // コマンドの検出と処理
-    const command = this.commandsHandler.detectCommand(userText);
+    const command = this.commandsHandler.detectCommand(safeUserText);
     if (command) {
       this.currentContext.lastCommand = command;
-      return this.commandsHandler.generateCommandPrompt(command.name, userText);
+      return this.commandsHandler.generateCommandPrompt(command.name, safeUserText);
     }
 
     // ペルソナの自動選択
-    const personaInfo = this.personaSelector.selectOptimalPersona(filePath, userText);
+    const personaInfo = this.personaSelector.selectOptimalPersona(filePath, safeUserText);
     this.currentContext.lastPersona = personaInfo.persona;
 
     return this.personaSelector.generatePersonaPrompt(personaInfo);

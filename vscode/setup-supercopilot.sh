@@ -59,7 +59,8 @@ fi
 # 3. settings.jsonの設定確認と生成
 echo -e "\n${BLUE}3. VSCode設定を確認しています...${NC}"
 VSCODE_SETTINGS="$HOME/.vscode/settings.json"
-CONFIG_JSON='{"github.copilot.advanced": {"preProcessors": {"chat": {"path": "~/.vscode/supercopilot/supercopilot-main.js", "function": "preprocessCopilotPrompt"}}}}'
+userHome="${HOME}"
+CONFIG_JSON='{"github.copilot.advanced": {"preProcessors": {"chat": {"path": "'"${userHome}"'/.vscode/supercopilot/supercopilot-main.js", "function": "preprocessCopilotPrompt"}}}}'
 
 # jqが利用可能かチェック
 if command -v jq >/dev/null 2>&1; then
@@ -114,7 +115,7 @@ if command -v jq >/dev/null 2>&1; then
   fi
 else
   echo -e "   ${YELLOW}jq が利用できません。従来のsed方式を使用します${NC}"
-  CONFIG_ENTRY='"github.copilot.advanced": { "preProcessors": { "chat": { "path": "~/.vscode/supercopilot/supercopilot-main.js", "function": "preprocessCopilotPrompt" } } }'
+  CONFIG_ENTRY='"github.copilot.advanced": { "preProcessors": { "chat": { "path": "'"${userHome}"'/.vscode/supercopilot/supercopilot-main.js", "function": "preprocessCopilotPrompt" } } }'
 
   if [ -f "$VSCODE_SETTINGS" ]; then
     echo -e "   ${GREEN}✓ VSCode設定ファイルが見つかりました${NC}"
