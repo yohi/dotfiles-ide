@@ -17,6 +17,10 @@ CURSOR_MAX_SIZE_BYTES := 500000000
 BYTES_TO_MB := 1048576
 
 # Cursor IDEのインストール
+.PHONY: install-packages-cursor _cursor_download _cursor_setup_desktop \
+        update-cursor stop-cursor check-cursor-version \
+        install-packages-supercursor
+
 install-packages-cursor:
 	@echo "📝 Cursor IDEのインストールを開始します..."
 	@if [ -f /opt/cursor/cursor.AppImage ]; then \
@@ -267,15 +271,29 @@ update-cursor:
 		echo "🌐 Cursor APIから最新バージョン情報を取得中..." && \
 		if ! command -v jq >/dev/null 2>&1; then \
 			echo "📦 jqをインストール中..."; \
+			JQ_LOG=$$(mktemp); \
 			if command -v apt-get >/dev/null 2>&1; then \
-				sudo apt-get update >/dev/null 2>&1 && sudo apt-get install -y jq >/dev/null 2>&1; \
+				if ! (sudo apt-get update >"$$JQ_LOG" 2>&1 && sudo apt-get install -y jq >>"$$JQ_LOG" 2>&1); then \
+					echo "❌ apt-get による jq のインストールに失敗しました"; \
+					cat "$$JQ_LOG"; rm -f "$$JQ_LOG"; exit 1; \
+				fi; \
 			elif command -v brew >/dev/null 2>&1; then \
-				brew install jq >/dev/null 2>&1; \
+				if ! brew install jq >"$$JQ_LOG" 2>&1; then \
+					echo "❌ brew による jq のインストールに失敗しました"; \
+					cat "$$JQ_LOG"; rm -f "$$JQ_LOG"; exit 1; \
+				fi; \
 			elif command -v yum >/dev/null 2>&1; then \
-				sudo yum install -y jq >/dev/null 2>&1; \
+				if ! sudo yum install -y jq >"$$JQ_LOG" 2>&1; then \
+					echo "❌ yum による jq のインストールに失敗しました"; \
+					cat "$$JQ_LOG"; rm -f "$$JQ_LOG"; exit 1; \
+				fi; \
 			elif command -v dnf >/dev/null 2>&1; then \
-				sudo dnf install -y jq >/dev/null 2>&1; \
+				if ! sudo dnf install -y jq >"$$JQ_LOG" 2>&1; then \
+					echo "❌ dnf による jq のインストールに失敗しました"; \
+					cat "$$JQ_LOG"; rm -f "$$JQ_LOG"; exit 1; \
+				fi; \
 			fi; \
+			rm -f "$$JQ_LOG"; \
 		fi && \
 		\
 		if command -v jq >/dev/null 2>&1; then \
