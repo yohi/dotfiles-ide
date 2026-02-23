@@ -473,7 +473,9 @@ check-cursor-version:
 			LATEST_VERSION=$$(echo "$$API_RESPONSE" | jq -r '.version' 2>/dev/null); \
 			echo "🆕 最新バージョン: $$LATEST_VERSION"; \
 			\
-			if [ -n "$$CURRENT_VERSION" ] && [ "$$CURRENT_VERSION" != "不明" ] && [ "$$CURRENT_VERSION" != "$$LATEST_VERSION" ]; then \
+			if [ -n "$$CURRENT_VERSION" ] && [ "$$CURRENT_VERSION" != "不明" ] && \
+			   echo "$$CURRENT_VERSION" | grep -Eq '^[0-9]+(\.[0-9]+)*' && \
+			   [ "$$CURRENT_VERSION" != "$$LATEST_VERSION" ]; then \
 				echo ""; \
 				echo "🔄 アップデートが利用可能です!"; \
 				echo "   'make update-cursor' でアップデートできます"; \
