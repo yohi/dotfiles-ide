@@ -9,6 +9,23 @@
 # CURSOR_NO_VERIFY_HASH=true を指定しない限りエラーとなります（セキュリティ強化）
 CURSOR_SHA256 :=
 
+# OS検出と互換コマンドの設定
+OS_NAME := $(shell uname -s)
+ifeq ($(OS_NAME),Darwin)
+    # macOS (BSD)
+    STAT_SIZE  := stat -f%z
+    STAT_MTIME := stat -f"%Sm" -t"%Y"
+    SHA256_CMD := shasum -a 256
+else
+    # Linux (GNU)
+    STAT_SIZE  := stat -c%s
+    STAT_MTIME := stat -c%y
+    SHA256_CMD := sha256sum
+endif
+
+# timeout コマンドの検出
+TIMEOUT_CMD := $(shell command -v timeout 2>/dev/null || command -v gtimeout 2>/dev/null || echo "false")
+
 # Cursor AppImageのサイズ制限 (bytes)
 # 期待されるサイズ範囲: 約100MB〜500MB
 CURSOR_MIN_SIZE_BYTES := 100000000
@@ -38,7 +55,7 @@ _cursor_download:
 		local min_size="$${1:-$(CURSOR_MIN_SIZE_BYTES)}"; \
 		local max_size="$${2:-$(CURSOR_MAX_SIZE_BYTES)}"; \
 		local file="$${3:-cursor.AppImage}"; \
-		local file_size=$$(stat -c%s "$$file" 2>/dev/null || echo "0"); \
+		local file_size=$$( $(STAT_SIZE) "$$file" 2>/dev/null || echo "0"); \
 		if [ "$$file_size" -ge "$$min_size" ] && [ "$$file_size" -le "$$max_size" ]; then \
 			echo "✅ サイズ検証に成功しました ($$file_size bytes)"; \
 			echo "   (範囲: $$(($$min_size/$(BYTES_TO_MB)))MB - $$(($$max_size/$(BYTES_TO_MB)))MB)"; \
@@ -61,7 +78,7 @@ _cursor_download:
 		\
 		VALID_DOWNLOAD=0; \
 		echo "🔐 ダウンロードファイルの整合性を検証中 (SHA256)..."; \
-		ACTUAL_HASH=$$(sha256sum cursor.AppImage | awk '{print $$1}'); \
+		ACTUAL_HASH=$$( $(SHA256_CMD) cursor.AppImage | awk '{print $$1}'); \
 		if [ -n "$(CURSOR_SHA256)" ]; then \
 			if [ "$$ACTUAL_HASH" != "$(CURSOR_SHA256)" ]; then \
 				echo "❌ ハッシュ不一致エラー"; \
@@ -113,7 +130,7 @@ _cursor_download:
 				echo "✅ $$CURSOR_FILE が見つかりました"; \
 				VALID_FILE=0; \
 				echo "🔐 ローカルファイルの整合性を検証中 (SHA256)..."; \
-				ACTUAL_HASH=$$(sha256sum "$$CURSOR_FILE" | awk '{print $$1}'); \
+				ACTUAL_HASH=$$( $(SHA256_CMD) "$$CURSOR_FILE" | awk '{print $$1}'); \
 				if [ -n "$(CURSOR_SHA256)" ]; then \
 					if [ "$$ACTUAL_HASH" != "$(CURSOR_SHA256)" ]; then \
 						echo "❌ ハッシュ不一致エラー ($$CURSOR_FILE)"; \
@@ -187,9 +204,17 @@ _cursor_setup_desktop:
 		if command -v unzip >/dev/null 2>&1; then \
 			TMPDIR=$$(mktemp -d); \
 			if [ -n "$$TMPDIR" ] && cd "$$TMPDIR"; then \
-				if timeout 30 unzip -j /opt/cursor/cursor.AppImage "*.png" 2>/dev/null || \
-				   timeout 30 unzip -j /opt/cursor/cursor.AppImage "usr/share/pixmaps/*.png" 2>/dev/null || \
-				   timeout 30 unzip -j /opt/cursor/cursor.AppImage "resources/*.png" 2>/dev/null; then \
+				run_unzip() { \
+					if [ "$(TIMEOUT_CMD)" != "false" ]; then \
+						"$(TIMEOUT_CMD)" 30 unzip "$$@"; \
+					else \
+						echo "⚠️  警告: timeout/gtimeout コマンドが見つからないため、タイムアウトなしで unzip を実行します。" >&2; \
+						unzip "$$@"; \
+					fi; \
+				}; \
+				if run_unzip -j /opt/cursor/cursor.AppImage "*.png" 2>/dev/null || \
+				   run_unzip -j /opt/cursor/cursor.AppImage "usr/share/pixmaps/*.png" 2>/dev/null || \
+				   run_unzip -j /opt/cursor/cursor.AppImage "resources/*.png" 2>/dev/null; then \
 					ICON_FILE=$$(ls -1 *.png 2>/dev/null | grep -i "cursor\|icon\|app" | head -1); \
 					if [ -z "$$ICON_FILE" ]; then ICON_FILE=$$(ls -1 *.png 2>/dev/null | head -1); fi; \
 					if [ -n "$$ICON_FILE" ] && [ -f "$$ICON_FILE" ]; then \
@@ -209,9 +234,6 @@ _cursor_setup_desktop:
 		echo "⚠️  アイコンの設定に失敗しました。デフォルトアイコンを使用します"; \
 	fi; \
 	echo "📝 デスクトップエントリーを作成中..."; \
-	echo "[Desktop Entry]" | sudo tee /usr/share/applications/cursor.desktop > /dev/null; \
-	echo "Name=Cursor" | sudo tee -a /usr/share/applications/cursor.desktop > /dev/null; \
-	echo "Comment=The AI-first code editor" | sudo tee -a /usr/share/applications/cursor.desktop > /dev/null; \
 	\
 	# --no-sandbox フラグについて: \
 	# 【背景】AppImageのChromiumベースアプリは、デフォルトでユーザー名前空間サンドボックスを要求します。 \
@@ -231,20 +253,14 @@ _cursor_setup_desktop:
 	# どうしても必要な場合に限り、環境変数 TRUSTED_NO_SANDBOX=true を設定してインストールしてください: \
 	#   make TRUSTED_NO_SANDBOX=true install-packages-cursor \
 	\
+	EXEC_VAL="/opt/cursor/cursor.AppImage %F"; \
 	if [ "$(TRUSTED_NO_SANDBOX)" = "true" ]; then \
 		echo "⚠️  警告: TRUSTED_NO_SANDBOX=true が設定されているため --no-sandbox フラグを適用します"; \
 		echo "⚠️  セキュリティリスク: サンドボックス保護が無効化されます"; \
-		echo "Exec=/opt/cursor/cursor.AppImage --no-sandbox %F" | sudo tee -a /usr/share/applications/cursor.desktop > /dev/null; \
-	else \
-		echo "Exec=/opt/cursor/cursor.AppImage %F" | sudo tee -a /usr/share/applications/cursor.desktop > /dev/null; \
+		EXEC_VAL="/opt/cursor/cursor.AppImage --no-sandbox %F"; \
 	fi; \
-	\
-	echo "Icon=$$ICON_PATH" | sudo tee -a /usr/share/applications/cursor.desktop > /dev/null; \
-	echo "Terminal=false" | sudo tee -a /usr/share/applications/cursor.desktop > /dev/null; \
-	echo "Type=Application" | sudo tee -a /usr/share/applications/cursor.desktop > /dev/null; \
-	echo "Categories=Development;IDE;TextEditor;" | sudo tee -a /usr/share/applications/cursor.desktop > /dev/null; \
-	echo "MimeType=text/plain;inode/directory;" | sudo tee -a /usr/share/applications/cursor.desktop > /dev/null; \
-	echo "StartupWMClass=cursor" | sudo tee -a /usr/share/applications/cursor.desktop > /dev/null; \
+	printf "[Desktop Entry]\nName=Cursor\nComment=The AI-first code editor\nExec=%%s\nIcon=%%s\nTerminal=false\nType=Application\nCategories=Development;IDE;TextEditor;\nMimeType=text/plain;inode/directory;\nStartupWMClass=cursor\n" \
+		"$$EXEC_VAL" "$$ICON_PATH" | sudo tee /usr/share/applications/cursor.desktop > /dev/null; \
 	sudo chmod +x /usr/share/applications/cursor.desktop; \
 	sudo update-desktop-database 2>/dev/null || true; \
 	echo "✅ Cursor IDEのセットアップが完了しました";
@@ -325,10 +341,10 @@ update-cursor:
 		if curl -L --user-agent "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36" \
 			--max-time 120 --retry 3 --retry-delay 5 \
 			-o cursor-new.AppImage "$$DOWNLOAD_URL" 2>/dev/null; then \
-			FILE_SIZE=$$(stat -c%s cursor-new.AppImage 2>/dev/null || echo "0"); \
+			FILE_SIZE=$$( $(STAT_SIZE) cursor-new.AppImage 2>/dev/null || echo "0"); \
 			if [ "$$FILE_SIZE" -ge $(CURSOR_MIN_SIZE_BYTES) ] && [ "$$FILE_SIZE" -le $(CURSOR_MAX_SIZE_BYTES) ]; then \
 				echo "✅ 新しいバージョンのダウンロードが完了しました (サイズ: $$FILE_SIZE bytes)"; \
-				ACTUAL_HASH=$$(sha256sum cursor-new.AppImage | awk '{print $$1}'); \
+				ACTUAL_HASH=$$( $(SHA256_CMD) cursor-new.AppImage | awk '{print $$1}'); \
 				if [ -n "$(CURSOR_SHA256)" ]; then \
 					if [ "$$ACTUAL_HASH" != "$(CURSOR_SHA256)" ]; then \
 						echo "❌ ハッシュ不一致エラー"; \
@@ -345,7 +361,13 @@ update-cursor:
 					exit 1; \
 				fi; \
 				echo "🔧 既存ファイルをバックアップ中..."; \
-				sudo cp /opt/cursor/cursor.AppImage /opt/cursor/cursor.AppImage.backup.$$(date +%Y%m%d_%H%M%S) && \
+				BACKUP_FILE="/opt/cursor/cursor.AppImage.backup.$$(date +%Y%m%d_%H%M%S)"; \
+				sudo cp /opt/cursor/cursor.AppImage "$$BACKUP_FILE" && \
+				echo "🧹 古いバックアップを整理中 (最新5件を保持)..."; \
+				BACKUP_LIST=$$(ls -t /opt/cursor/cursor.AppImage.backup.* 2>/dev/null | tail -n +6); \
+				if [ -n "$$BACKUP_LIST" ]; then \
+					echo "$$BACKUP_LIST" | xargs sudo rm -f; \
+				fi && \
 				chmod +x cursor-new.AppImage && \
 				sudo cp cursor-new.AppImage /opt/cursor/cursor.AppImage && \
 				sudo chown root:root /opt/cursor/cursor.AppImage && \
@@ -431,7 +453,7 @@ check-cursor-version:
 			fi; \
 		fi; \
 		if [ "$$CURRENT_VERSION" = "不明" ]; then \
-			FILE_DATE=$$(stat -c%y /opt/cursor/cursor.AppImage 2>/dev/null | cut -d' ' -f1 || echo "不明"); \
+			FILE_DATE=$$( $(STAT_MTIME) /opt/cursor/cursor.AppImage 2>/dev/null | cut -d' ' -f1 || echo "不明"); \
 			CURRENT_VERSION="インストール済み ($$FILE_DATE)"; \
 		fi; \
 		echo "💻 現在のバージョン: $$CURRENT_VERSION"; \
