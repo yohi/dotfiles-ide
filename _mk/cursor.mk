@@ -52,10 +52,10 @@ _cursor_download:
 	@echo "📦 方法1: 自動ダウンロードを試行中..."
 	@cd /tmp && \
 	verify_download_size() { \
-		local min_size="$${1:-$(CURSOR_MIN_SIZE_BYTES)}"; \
-		local max_size="$${2:-$(CURSOR_MAX_SIZE_BYTES)}"; \
-		local file="$${3:-cursor.AppImage}"; \
-		local file_size=$$( $(STAT_SIZE) "$$file" 2>/dev/null || echo "0"); \
+		min_size="$${1:-$(CURSOR_MIN_SIZE_BYTES)}"; \
+		max_size="$${2:-$(CURSOR_MAX_SIZE_BYTES)}"; \
+		file="$${3:-cursor.AppImage}"; \
+		file_size=$$( $(STAT_SIZE) "$$file" 2>/dev/null || echo "0"); \
 		if [ "$$file_size" -ge "$$min_size" ] && [ "$$file_size" -le "$$max_size" ]; then \
 			echo "✅ サイズ検証に成功しました ($$file_size bytes)"; \
 			echo "   (範囲: $$(($$min_size/$(BYTES_TO_MB)))MB - $$(($$max_size/$(BYTES_TO_MB)))MB)"; \
