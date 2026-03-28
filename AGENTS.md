@@ -8,22 +8,15 @@
 ```text
 dotfiles-ide/
 ├── _mk/                        # Makefile sub-targets
-│   └── cursor.mk              # Cursor-specific Makefile targets
+│   ├── cursor.mk              # Cursor-specific Makefile targets
+│   └── ide-vscode.mk          # VS Code-specific Makefile targets
 ├── cursor/                     # Cursor editor configuration
-│   ├── CLAUDE.md               # Claude Code context for Cursor
-│   ├── commands/               # Custom command definitions
 │   ├── keybindings.json        # Cursor keybindings
-│   ├── mcp.json                # MCP server configuration
-│   ├── mcp.json.template       # MCP config template
-│   ├── settings.json           # Cursor settings
-│   └── supercursor/            # SuperCursor agent framework
+│   └── settings.json           # Cursor settings
 ├── vscode/                     # VS Code configuration
 │   ├── extensions.list         # Extension list
 │   ├── keybindings.json        # VS Code keybindings
-│   ├── settings.json           # VS Code settings
-│   ├── copilot-instructions/   # GitHub Copilot instruction files
-│   ├── settings/               # SuperCopilot scripts
-│   └── setup-supercopilot.sh   # SuperCopilot setup script
+│   └── settings.json           # VS Code settings
 └── Makefile                    # Setup entry point
 ```
 
@@ -40,10 +33,11 @@ We strictly separate **"IDE Infrastructure & UI"** (`dotfiles-ide`) from **"AI R
 - **`dotfiles-ai`** manages the mind and tools of the AI (`mcp.json`, `supercursor` framework, Agent instructions, SkillPort).
 Never mix AI instructions or MCP configs here, and never put IDE styling configurations in `dotfiles-ai`.
 
+**Note:** If you find any AI-related configuration files (like `mcp.json`, `CLAUDE.md`, or AI frameworks) in this repository, please move them to the `dotfiles-ai` repository.
+
 - `cursor/` and `vscode/` settings are installed via Makefile targets or manual symlink.
-- `_mk/cursor.mk` contains Cursor-specific install/setup targets, included by the root Makefile.
+- `_mk/cursor.mk` and `_mk/ide-vscode.mk` contain editor-specific install/setup targets.
 - IDE settings files (`settings.json`, `keybindings.json`) are managed per-editor in subdirectories.
-- `mcp.json.template` is the editable template; `mcp.json` may be generated from it.
 - Symlinks are managed explicitly via `ln -sfn` in the Makefile.
 
 ## CODE STYLE

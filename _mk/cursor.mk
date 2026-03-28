@@ -39,21 +39,20 @@ CURSOR_MAX_SIZE_BYTES := 500000000
 BYTES_TO_MB := 1048576
 
 # Cursor IDEのインストール
-.PHONY: install-packages-cursor _cursor_download _cursor_setup_desktop \
+.PHONY: install-packages-cursor _cursor_download _cursor_setup_desktop _cursor_link_settings \
         update-cursor stop-cursor check-cursor-version \
         setup-cursor
 
 install-packages-cursor:
-	@echo "📝 Cursor IDEのインストールを開始します..."
-	@if [ -f /opt/cursor/cursor.AppImage ]; then \
-		echo "✅ Cursor IDEは既にインストールされています"; \
-	else \
-		$$(MAKE) _cursor_download; \
-	fi
-	@$$(MAKE) _cursor_setup_desktop
-	@$$(MAKE) _cursor_link_settings
-	@echo "✅ Cursor IDEのインストールが完了しました"
-
+        @echo "📝 Cursor IDEのインストールを開始します..."
+        @if [ -f /opt/cursor/cursor.AppImage ]; then \
+                echo "✅ Cursor IDEは既にインストールされています"; \
+        else \
+                $(MAKE) _cursor_download; \
+        fi
+        @$(MAKE) _cursor_setup_desktop
+        @$(MAKE) _cursor_link_settings
+        @echo "✅ Cursor IDEのインストールが完了しました"
 setup-cursor: _cursor_link_settings ## Cursorの設定をセットアップ（設定ファイルのみ）
 
 _cursor_link_settings:
