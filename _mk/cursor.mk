@@ -8,29 +8,9 @@ export SHELL := /bin/sh
 # POSIX準拠の動作を保証しています。
 # ============================================================
 
+include _mk/common.mk
+
 # Cursor AppImageのSHA256ハッシュ
-# TODO: Cursor公式にSHA256チェックサムの公開をリクエスト中
-# チェックサムが公開されるまでは、空欄に設定されていますが、インストール時には
-# CURSOR_NO_VERIFY_HASH=true を指定しない限りエラーとなります（セキュリティ強化）
-CURSOR_SHA256 :=
-
-# OS検出と互換コマンドの設定
-OS_NAME := $(shell uname -s)
-ifeq ($(OS_NAME),Darwin)
-    # macOS (BSD)
-    STAT_SIZE  := stat -f%z
-    STAT_MTIME := stat -f"%Sm" -t"%Y"
-    SHA256_CMD := shasum -a 256
-else
-    # Linux (GNU)
-    STAT_SIZE  := stat -c%s
-    STAT_MTIME := stat -c%y
-    SHA256_CMD := sha256sum
-endif
-
-# timeout コマンドの検出
-TIMEOUT_CMD := $(shell command -v timeout 2>/dev/null || command -v gtimeout 2>/dev/null || echo "false")
-
 # Cursor AppImageのサイズ制限 (bytes)
 # 期待されるサイズ範囲: 約100MB〜500MB
 CURSOR_MIN_SIZE_BYTES := 100000000
