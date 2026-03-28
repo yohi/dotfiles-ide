@@ -36,20 +36,23 @@ install-packages-cursor:
 setup-cursor: _cursor_link_settings ## Cursorの設定をセットアップ（設定ファイルのみ）
 
 _cursor_link_settings:
-	@echo "📝 Cursorの設定をリンクしています..."
-	@mkdir -p $(HOME_DIR)/.config/Cursor/User
-	@for f in settings.json keybindings.json; do \
-		src="$(REPO_ROOT)/cursor/$$f"; \
-		dst="$(HOME_DIR)/.config/Cursor/User/$$f"; \
-		if [ -f "$$dst" ] && [ ! -L "$$dst" ]; then \
-			backup="$$dst.bak.$$(date +%Y%m%d_%H%M%S)"; \
-			echo "⚠️  既存の $$f をバックアップします: $$backup"; \
-			mv "$$dst" "$$backup"; \
-		fi; \
-		ln -sf "$$src" "$$dst"; \
-	done
-	@echo "✅ Cursor設定のリンクが完了しました"
-
+        @echo "📝 Cursorの設定をリンクしています..."
+        @mkdir -p "$(CURSOR_USER_DIR)"
+        @for f in settings.json keybindings.json; do \
+                src="$(REPO_ROOT)/cursor/$$f"; \
+                dst="$(CURSOR_USER_DIR)/$$f"; \
+                if [ ! -f "$$src" ]; then \
+                        echo "⚠️  ソースファイルが見つからないためスキップします: $$src"; \
+                        continue; \
+                fi; \
+                if [ -f "$$dst" ] && [ ! -L "$$dst" ]; then \
+                        backup="$$dst.bak.$$(date +%Y%m%d_%H%M%S)"; \
+                        echo "⚠️  既存の $$f をバックアップします: $$backup"; \
+                        mv "$$dst" "$$backup" || exit 1; \
+                fi; \
+                ln -sf "$$src" "$$dst" || exit 1; \
+        done
+        @echo "✅ Cursor設定のリンクが完了しました"
 
 _cursor_download:
 	@echo "📦 方法1: 自動ダウンロードを試行中..."

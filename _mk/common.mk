@@ -7,6 +7,7 @@ OS_NAME := $(shell uname -s)
 ifeq ($(OS_NAME),Darwin)
     # macOS
     VSCODE_USER_DIR := $(HOME)/Library/Application Support/Code/User
+    CURSOR_USER_DIR := $(HOME)/Library/Application Support/Cursor/User
     # macOS (BSD)
     STAT_SIZE  := stat -f%z
     STAT_MTIME := stat -f"%Sm" -t"%Y"
@@ -14,6 +15,7 @@ ifeq ($(OS_NAME),Darwin)
 else
     # Linux
     VSCODE_USER_DIR := $(HOME)/.config/Code/User
+    CURSOR_USER_DIR := $(HOME)/.config/Cursor/User
     # Linux (GNU)
     STAT_SIZE  := stat -c%s
     STAT_MTIME := stat -c%y
