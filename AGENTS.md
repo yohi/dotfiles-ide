@@ -3,6 +3,11 @@
 **Repository:** dotfiles-ide
 **Role:** IDE configuration — VS Code settings, keybindings, extensions, and Cursor editor settings
 
+## COMPONENT LAYOUT CONVENTION
+
+This repository is part of the **dotfiles polyrepo** orchestrated by [dotfiles-core](https://github.com/yohi/dotfiles-core).
+All changes MUST comply with the central layout rules. Please refer to the central [ARCHITECTURE.md](https://raw.githubusercontent.com/yohi/dotfiles-core/refs/heads/master/docs/ARCHITECTURE.md) for the full, authoritative rules and constraints.
+
 ## STRUCTURE
 
 ```text
@@ -19,11 +24,6 @@ dotfiles-ide/
 │   └── settings.json           # VS Code settings
 └── Makefile                    # Setup entry point
 ```
-
-## COMPONENT LAYOUT CONVENTION
-
-This repository is part of the **dotfiles polyrepo** orchestrated by `dotfiles-core`.
-All changes MUST comply with the central layout rules. Please refer to the central [ARCHITECTURE.md](https://raw.githubusercontent.com/yohi/dotfiles-core/refs/heads/master/docs/ARCHITECTURE.md) for the full, authoritative rules and constraints.
 
 ## THIS COMPONENT — SPECIAL NOTES
 
