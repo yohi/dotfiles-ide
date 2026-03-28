@@ -5,20 +5,18 @@
 
 # Component-specific logic
 
-# Orchestrator core configuration
-# Note: These are symlinked from ../../common-mk/ when managed by dotfiles-core
 
-# Component-specific logic
+
+
 
 REPO_ROOT ?= $(CURDIR)
-.DEFAULT_GOAL := setup
 include _mk/cursor.mk
 
 .PHONY: setup
-setup:
+setup: ## セットアップ（依存関係、設定適用）を一括実行します
 	@echo "==> Setting up dotfiles-ide"
 	$(MAKE) -f _mk/cursor.mk install-cursor
 
 .PHONY: link
-link:
+link: ## シンボリックリンクを展開し、dotfiles を配置します
 	@echo "==> Linking dotfiles-ide (Skipped, handled manually or none)"
