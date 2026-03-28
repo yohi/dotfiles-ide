@@ -13,6 +13,8 @@
 ```text
 dotfiles-ide/
 ├── _mk/                        # Makefile sub-targets
+│   ├── core.mk                 # -> common-mk/core.mk (symlink)
+│   ├── help.mk                 # -> common-mk/help.mk (symlink)
 │   └── cursor.mk              # Cursor-specific Makefile targets
 ├── cursor/                     # Cursor editor configuration
 │   ├── CLAUDE.md               # Claude Code context for Cursor
