@@ -41,17 +41,36 @@ BYTES_TO_MB := 1048576
 # Cursor IDEのインストール
 .PHONY: install-packages-cursor _cursor_download _cursor_setup_desktop \
         update-cursor stop-cursor check-cursor-version \
-        install-packages-supercursor
+        setup-cursor
 
 install-packages-cursor:
 	@echo "📝 Cursor IDEのインストールを開始します..."
 	@if [ -f /opt/cursor/cursor.AppImage ]; then \
 		echo "✅ Cursor IDEは既にインストールされています"; \
 	else \
-		$(MAKE) _cursor_download; \
+		$$(MAKE) _cursor_download; \
 	fi
-	@$(MAKE) _cursor_setup_desktop
+	@$$(MAKE) _cursor_setup_desktop
+	@$$(MAKE) _cursor_link_settings
 	@echo "✅ Cursor IDEのインストールが完了しました"
+
+setup-cursor: _cursor_link_settings ## Cursorの設定をセットアップ（設定ファイルのみ）
+
+_cursor_link_settings:
+	@echo "📝 Cursorの設定をリンクしています..."
+	@mkdir -p $(HOME_DIR)/.config/Cursor/User
+	@for f in settings.json keybindings.json; do \
+		src="$(REPO_ROOT)/cursor/$$f"; \
+		dst="$(HOME_DIR)/.config/Cursor/User/$$f"; \
+		if [ -f "$$dst" ] && [ ! -L "$$dst" ]; then \
+			backup="$$dst.bak.$$(date +%Y%m%d_%H%M%S)"; \
+			echo "⚠️  既存の $$f をバックアップします: $$backup"; \
+			mv "$$dst" "$$backup"; \
+		fi; \
+		ln -sf "$$src" "$$dst"; \
+	done
+	@echo "✅ Cursor設定のリンクが完了しました"
+
 
 _cursor_download:
 	@echo "📦 方法1: 自動ダウンロードを試行中..."
@@ -490,106 +509,6 @@ check-cursor-version:
 		echo "   'sudo apt install jq' でjqをインストールしてください"; \
 	fi
 
-# SuperCursor (Cursor Framework) のインストール
-install-packages-supercursor:
-	@echo "🚀 SuperCursor (Cursor Framework) のインストールを開始..."
-
-	# Cursor の確認
-	@echo "🔍 Cursor の確認中..."
-	@if ! command -v cursor >/dev/null 2>&1; then \
-		echo "ℹ️  Cursor コマンドが PATH に見つかりません（AppImage 等でインストールされている場合は正常です）"; \
-	else \
-		echo "✅ Cursor が見つかりました"; \
-	fi
-
-	# SuperCursorフレームワークのセットアップ
-	@echo "⚙️  SuperCursor フレームワークをセットアップ中..."
-	@echo "🔧 SuperCursor セットアップ準備中..."
-	@echo "ℹ️   フレームワークファイル、ペルソナ、コマンドをシンボリックリンクで構成します"
-	\
-	# 必要な変数の確認
-	if [ -z "${REPO_ROOT}" ]; then \
-		echo "❌ REPO_ROOT is not set"; \
-		exit 1; \
-	fi; \
-	if [ -z "${HOME_DIR}" ]; then \
-		echo "❌ HOME_DIR is not set"; \
-		exit 1; \
-	fi; \
-	if [ -z "${DOTFILES_SHELL_ROOT}" ] || [ ! -d "${DOTFILES_SHELL_ROOT}" ]; then \
-		echo "❌ DOTFILES_SHELL_ROOT is not set or not a directory: ${DOTFILES_SHELL_ROOT}"; \
-		exit 1; \
-	fi; \
-	\
-	echo "📁 必要なディレクトリを作成中..."; \
-	mkdir -p "${HOME_DIR}/.cursor"; \
-	\
-	echo "🔗 シンボリックリンクを作成中..."; \
-	# SuperCursor本体へのリンク \
-	rm -rf "${HOME_DIR}/.cursor/supercursor"; \
-	if [ ! -d "${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor" ]; then \
-		echo "❌ Source path not found: ${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor"; \
-		exit 1; \
-	fi; \
-	ln -s "${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor" "${HOME_DIR}/.cursor/supercursor"; \
-	# 各種ディレクトリへのリンク \
-	rm -rf "${HOME_DIR}/.cursor/commands"; \
-	if [ ! -d "${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor/Commands" ]; then \
-		echo "❌ Source path not found: ${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor/Commands"; \
-		exit 1; \
-	fi; \
-	ln -s "${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor/Commands" "${HOME_DIR}/.cursor/commands"; \
-	rm -rf "${HOME_DIR}/.cursor/core"; \
-	if [ ! -d "${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor/Core" ]; then \
-		echo "❌ Source path not found: ${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor/Core"; \
-		exit 1; \
-	fi; \
-	ln -s "${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor/Core" "${HOME_DIR}/.cursor/core"; \
-	rm -rf "${HOME_DIR}/.cursor/hooks"; \
-	if [ ! -d "${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor/Hooks" ]; then \
-		echo "❌ Source path not found: ${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor/Hooks"; \
-		exit 1; \
-	fi; \
-	ln -s "${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor/Hooks" "${HOME_DIR}/.cursor/hooks"; \
-	# 重要なファイルへの直接リンク \
-	rm -f "${HOME_DIR}/.cursor/CURSOR.md"; \
-	if [ ! -f "${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor/README.md" ]; then \
-		echo "❌ Source file not found: ${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor/README.md"; \
-		exit 1; \
-	fi; \
-	ln -sf "${DOTFILES_SHELL_ROOT}/dotfiles-ide/cursor/supercursor/README.md" "${HOME_DIR}/.cursor/CURSOR.md"; \
-	\
-	echo "✅ SuperCursor フレームワークのシンボリックリンク設定が完了しました"
-
-	@echo "";
-	@echo "🎉 SuperCursor のセットアップが完了しました！"
-	@echo "";
-	@echo "🚀 使用方法:"
-	@echo "1. Cursor IDEを起動"
-	@echo "2. SuperCursor コマンドを使用:"
-	@echo "";
-	@echo "📋 利用可能なコマンド例:"
-	@echo "   /sc:implement <feature>    - 機能の実装"
-	@echo "   /sc:build                  - ビルド・パッケージング"
-	@echo "   /sc:design <ui>            - UI/UXデザイン"
-	@echo "   /sc:analyze <code>         - コード分析"
-	@echo "   /sc:troubleshoot <issue>   - 問題のデバッグ"
-	@echo "   /sc:test <suite>           - テストスイート"
-	@echo "   /sc:improve <code>         - コード改善"
-	@echo "   /sc:cleanup                - コードクリーンアップ"
-	@echo "   /sc:document <code>        - ドキュメント生成"
-	@echo "   /sc:git <operation>        - Git操作"
-	@echo "   /sc:estimate <task>        - 時間見積もり"
-	@echo "   /sc:task <management>      - タスク管理"
-	@echo "";
-	@echo "🎭 スマートペルソナ:"
-	@echo "   🏗️  architect   - システム設計・アーキテクチャ"
-	@echo "   🎨 developer   - 実装開発"
-	@echo "   📊 analyst     - コード分析・評価"
-	@echo "   🧪 tester      - テスト設計・実装"
-	@echo "   🚀 devops      - インフラ・デプロイ"
-	@echo "";
-	@echo "✅ SuperCursor のインストールが完了しました"
 
 # ========================================
 # エイリアス
@@ -598,5 +517,3 @@ install-packages-supercursor:
 .PHONY: install-cursor
 install-cursor: install-packages-cursor  ## Cursor IDEをインストール(エイリアス)
 
-.PHONY: install-supercursor
-install-supercursor: install-packages-supercursor  ## SuperCursorをインストール(エイリアス)

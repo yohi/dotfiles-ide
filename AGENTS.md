@@ -34,6 +34,12 @@ All changes MUST comply with the central layout rules. Please refer to the centr
 
 ## THIS COMPONENT — SPECIAL NOTES
 
+### 💡 Core Design Philosophy: Separation of Concerns
+We strictly separate **"IDE Infrastructure & UI"** (`dotfiles-ide`) from **"AI Rules & Behavior"** (`dotfiles-ai`).
+- **`dotfiles-ide`** (this repository) manages the physical editor settings (`settings.json`, `keybindings.json`, visual themes).
+- **`dotfiles-ai`** manages the mind and tools of the AI (`mcp.json`, `supercursor` framework, Agent instructions, SkillPort).
+Never mix AI instructions or MCP configs here, and never put IDE styling configurations in `dotfiles-ai`.
+
 - `cursor/` and `vscode/` settings are installed via Makefile targets or manual symlink.
 - `_mk/cursor.mk` contains Cursor-specific install/setup targets, included by the root Makefile.
 - IDE settings files (`settings.json`, `keybindings.json`) are managed per-editor in subdirectories.
