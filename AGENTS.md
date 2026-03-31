@@ -1,12 +1,18 @@
 # PROJECT KNOWLEDGE BASE
 
-**Repository:** dotfiles-ide
-**Role:** IDE configuration — VS Code settings, keybindings, extensions, and Cursor editor settings
 
 ## COMPONENT LAYOUT CONVENTION
 
-This repository is part of the **dotfiles polyrepo** orchestrated by [dotfiles-core](https://github.com/yohi/dotfiles-core).
-All changes MUST comply with the central layout rules. Please refer to the central [ARCHITECTURE.md](https://raw.githubusercontent.com/yohi/dotfiles-core/refs/heads/master/docs/ARCHITECTURE.md) for the full, authoritative rules and constraints.
+This repository is part of the **dotfiles polyrepo** managed by [dotfiles-core](https://github.com/yohi/dotfiles).
+
+### ⚠️ CRITICAL: SYMBOLIC LINK & STANDALONE USAGE
+- **Standalone usage is NOT supported.** This repository depends on the central `common-mk` rules.
+- **Symbolic Links:** This repository relies on symbolic links to `common-mk`. **NEVER** suggest or perform a replacement of these symbolic links with physical files/directories. 
+- **SSOT:** Always respect the "Single Source of Truth" principle. Shared logic resides in `dotfiles-core`, and components must remain thin wrappers or specific configurations.
+- **Architectural Compliance:** All modifications must adhere to the layout defined in the central [ARCHITECTURE.md](https://github.com/yohi/dotfiles/blob/master/docs/ARCHITECTURE.md).
+
+**Repository:** dotfiles-ide
+**Role:** IDE configuration — VS Code settings, keybindings, extensions, and Cursor editor settings
 
 ## STRUCTURE
 
