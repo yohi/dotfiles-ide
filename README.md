@@ -10,7 +10,34 @@
 推奨される使用方法は、`dotfiles-core` リポジトリから `make setup` を実行し、適切なディレクトリ構造とシンボリックリンクが構成された状態で利用することです。
 
 VS Code、Cursorなど、IDE（統合開発環境）の設定や拡張機能を管理するコンポーネントリポジトリです。
-`dotfiles-core` と連携して動作します。
+
+## 管理と共存関係
+
+> [!IMPORTANT]
+> 本リポジトリは [dotfiles-core](https://github.com/yohi/dotfiles-core) によって管理されるコンポーネントの一つです。
+
+> [!WARNING]
+> **使用時の注意点**
+> 本リポジトリは `dotfiles-core` の共通 Makefile ルール（`common-mk`）に依存しており、実行時には `common-mk` へのシンボリックリンクが必要です。そのため、**本リポジトリ単体での使用（クローンしての利用）はサポートされていません。**
+>
+> 推奨される使用方法は、`dotfiles-core` リポジトリから `make setup` を実行し、適切なディレクトリ構造とシンボリックリンクが構成された状態で利用することです。
+
+## 主要機能
+
+- **エディタ設定の同期**: VS Code / Cursor の基本設定 (`settings.json`) やキーバインドの統一。
+- **拡張機能管理**: 推奨プラグインリストの一括管理。
+
+## ディレクトリ構成
+
+```text
+.
+├── Makefile
+├── README.md
+├── AGENTS.md
+├── _mk/                    # Makefile sub-targets
+├── cursor/                 # Cursor settings (settings.json, keybindings.json)
+└── vscode/                 # VS Code settings (extensions.list, etc.)
+```
 
 ## 主要機能
 
