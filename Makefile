@@ -1,15 +1,25 @@
-REPO_ROOT ?= $(CURDIR)
-.DEFAULT_GOAL := setup
-include _mk/cursor.mk
-include _mk/ide-vscode.mk
+# ============================================================
+# dotfiles-ide: IDE 設定・インストール
+# ============================================================
 
+.DEFAULT_GOAL := help
 
-.PHONY: setup
-setup:
+REPO_ROOT := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+
+include _mk/core.mk
+include _mk/help.mk
+-include _mk/cursor.mk
+-include _mk/ide-vscode.mk
+
+.PHONY: help install setup install-ide setup-ide
+
+install: install-ide ## IDE 関連のインストール
+setup: setup-ide ## IDE の設定適用
+
+install-ide:
+	@echo "==> Installing dotfiles-ide"
+	$(MAKE) install-cursor
+
+setup-ide:
 	@echo "==> Setting up dotfiles-ide"
-	$(MAKE) -f _mk/cursor.mk install-cursor
 	$(MAKE) setup-vscode
-.PHONY: link
-link:
-	@echo "==> Linking dotfiles-ide (Skipped, handled manually or none)"
-
