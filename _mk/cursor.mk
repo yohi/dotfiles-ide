@@ -20,39 +20,39 @@ BYTES_TO_MB := 1048576
 
 # Cursor IDEのインストール
 .PHONY: install-packages-cursor _cursor_download _cursor_setup_desktop _cursor_link_settings \
-        update-cursor stop-cursor check-cursor-version \
-        setup-cursor
+	update-cursor stop-cursor check-cursor-version \
+	setup-cursor
 
 install-packages-cursor:
-        @echo "📝 Cursor IDEのインストールを開始します..."
-        @if [ -f /opt/cursor/cursor.AppImage ]; then \
-                echo "✅ Cursor IDEは既にインストールされています"; \
-        else \
-                $(MAKE) _cursor_download; \
-        fi
-        @$(MAKE) _cursor_setup_desktop
-        @$(MAKE) _cursor_link_settings
-        @echo "✅ Cursor IDEのインストールが完了しました"
+	@echo "📝 Cursor IDEのインストールを開始します..."
+	@if [ -f /opt/cursor/cursor.AppImage ]; then \
+		echo "✅ Cursor IDEは既にインストールされています"; \
+	else \
+		$(MAKE) _cursor_download; \
+	fi
+	@$(MAKE) _cursor_setup_desktop
+	@$(MAKE) _cursor_link_settings
+	@echo "✅ Cursor IDEのインストールが完了しました"
 setup-cursor: _cursor_link_settings ## Cursorの設定をセットアップ（設定ファイルのみ）
 
 _cursor_link_settings:
-        @echo "📝 Cursorの設定をリンクしています..."
-        @mkdir -p "$(CURSOR_USER_DIR)"
-        @for f in settings.json keybindings.json; do \
-                src="$(REPO_ROOT)/cursor/$$f"; \
-                dst="$(CURSOR_USER_DIR)/$$f"; \
-                if [ ! -f "$$src" ]; then \
-                        echo "⚠️  ソースファイルが見つからないためスキップします: $$src"; \
-                        continue; \
-                fi; \
-                if [ -f "$$dst" ] && [ ! -L "$$dst" ]; then \
-                        backup="$$dst.bak.$$(date +%Y%m%d_%H%M%S)"; \
-                        echo "⚠️  既存の $$f をバックアップします: $$backup"; \
-                        mv "$$dst" "$$backup" || exit 1; \
-                fi; \
-                ln -sf "$$src" "$$dst" || exit 1; \
-        done
-        @echo "✅ Cursor設定のリンクが完了しました"
+	@echo "📝 Cursorの設定をリンクしています..."
+	@mkdir -p "$(CURSOR_USER_DIR)"
+	@for f in settings.json keybindings.json; do \
+	        src="$(REPO_ROOT)/cursor/$$f"; \
+	        dst="$(CURSOR_USER_DIR)/$$f"; \
+	        if [ ! -f "$$src" ]; then \
+	                echo "⚠️  ソースファイルが見つからないためスキップします: $$src"; \
+	                continue; \
+	        fi; \
+	        if [ -f "$$dst" ] && [ ! -L "$$dst" ]; then \
+	                backup="$$dst.bak.$$(date +%Y%m%d_%H%M%S)"; \
+	                echo "⚠️  既存の $$f をバックアップします: $$backup"; \
+	                mv "$$dst" "$$backup" || exit 1; \
+	        fi; \
+	        ln -sf "$$src" "$$dst" || exit 1; \
+	done
+	@echo "✅ Cursor設定のリンクが完了しました"
 
 _cursor_download:
 	@echo "📦 方法1: 自動ダウンロードを試行中..."
