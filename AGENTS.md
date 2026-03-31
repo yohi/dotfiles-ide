@@ -1,62 +1,25 @@
-# PROJECT KNOWLEDGE BASE
+# Agent Instructions: dotfiles-ide
 
+This repository manages the **IDE configurations (VS Code, Cursor)** within the dotfiles system.
+It focuses on the "Container/UI" aspect, while `dotfiles-ai` handles the "Brain/AI" logic.
 
-## COMPONENT LAYOUT CONVENTION
+This repository is part of the **dotfiles polyrepo** managed by [dotfiles-core](https://github.com/yohi/dotfiles-core).
 
-This repository is part of the **dotfiles polyrepo** managed by [dotfiles-core](https://github.com/yohi/dotfiles).
+## 🛠 Role & Scope
+- **Domain:** Editor UI, UX, standard extensions, and keybindings.
+- **Tools:** VS Code, Cursor.
+- **Relationship:** Depends on `common-mk` from `dotfiles-core`. Complements `dotfiles-ai`.
 
-### ⚠️ CRITICAL: SYMBOLIC LINK & STANDALONE USAGE
-- **Standalone usage is NOT supported.** This repository depends on the central `common-mk` rules.
-- **Symbolic Links:** This repository relies on symbolic links to `common-mk`. **NEVER** suggest or perform a replacement of these symbolic links with physical files/directories. 
-- **SSOT:** Always respect the "Single Source of Truth" principle. Shared logic resides in `dotfiles-core`, and components must remain thin wrappers or specific configurations.
-- **Architectural Compliance:** All modifications must adhere to the layout defined in the central [ARCHITECTURE.md](https://github.com/yohi/dotfiles/blob/master/docs/ARCHITECTURE.md).
+## 📐 Project Structure
+- `cursor/`: Settings for Cursor editor.
+- `vscode/`: Settings and extension lists for VS Code.
+- `_mk/`: Internal Makefile components linked from `common-mk`.
 
-**Repository:** dotfiles-ide
-**Role:** IDE configuration — VS Code settings, keybindings, extensions, and Cursor editor settings
+## 🤖 AI Interaction Guidelines
+- **Context Awareness:** Always check if a configuration change belongs here (UI/Editor) or in `dotfiles-ai` (AI logic/MCP).
+- **Architectural Compliance:** All modifications must adhere to the layout defined in the central [ARCHITECTURE.md](https://github.com/yohi/dotfiles-core/blob/master/docs/ARCHITECTURE.md).
+- **Idempotency:** Ensure all setup scripts and Makefile targets are idempotent.
 
-## STRUCTURE
-
-```text
-dotfiles-ide/
-├── _mk/                        # Makefile sub-targets
-│   ├── cursor.mk              # Cursor-specific Makefile targets
-│   └── ide-vscode.mk          # VS Code-specific Makefile targets
-├── cursor/                     # Cursor editor configuration
-│   ├── keybindings.json        # Cursor keybindings
-│   └── settings.json           # Cursor settings
-├── vscode/                     # VS Code configuration
-│   ├── extensions.list         # Extension list
-│   ├── keybindings.json        # VS Code keybindings
-│   └── settings.json           # VS Code settings
-└── Makefile                    # Setup entry point
-```
-
-## THIS COMPONENT — SPECIAL NOTES
-
-### 💡 Core Design Philosophy: Separation of Concerns
-We strictly separate **"IDE Infrastructure & UI"** (`dotfiles-ide`) from **"AI Rules & Behavior"** (`dotfiles-ai`).
-- **`dotfiles-ide`** (this repository) manages the physical editor settings (`settings.json`, `keybindings.json`, visual themes).
-- **`dotfiles-ai`** manages the mind and tools of the AI (`mcp.json`, `supercursor` framework, Agent instructions, SkillPort).
-Never mix AI instructions or MCP configs here, and never put IDE styling configurations in `dotfiles-ai`.
-
-**Note:** If you find any AI-related configuration files (like `mcp.json`, `CLAUDE.md`, or AI frameworks) in this repository, please move them to the `dotfiles-ai` repository.
-
-- `cursor/` and `vscode/` settings are installed via Makefile targets or manual symlink.
-- `_mk/cursor.mk` and `_mk/ide-vscode.mk` contain editor-specific install/setup targets.
-- IDE settings files (`settings.json`, `keybindings.json`) are managed per-editor in subdirectories.
-- Symlinks are managed explicitly via `ln -sfn` in the Makefile.
-
-## CODE STYLE
-
-- **Documentation / README**: Japanese (日本語)
-- **AGENTS.md**: English
-- **Commit Messages**: Japanese, Conventional Commits (e.g., `feat: 新機能追加`, `fix: バグ修正`)
-- **Shell**: `set -euo pipefail`, dynamic path resolution, idempotent operations
-
-## FORBIDDEN OPERATIONS
-
-Per `opencode.jsonc` (when present), these operations are blocked for agent execution:
-
-- `rm` (destructive file operations)
-- `ssh` (remote access)
-- `sudo` (privilege escalation)
+## 🔗 Related Components
+- [dotfiles-core](https://github.com/yohi/dotfiles-core): Orchestrator and common build logic.
+- [dotfiles-ai](https://github.com/yohi/dotfiles-ai): AI personas, skills, and MCP configurations.
