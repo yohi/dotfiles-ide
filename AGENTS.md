@@ -16,6 +16,7 @@ This repository is part of the **dotfiles polyrepo** managed by [dotfiles-core](
 - `_mk/`: Internal Makefile components linked from `common-mk`.
 
 ## 🤖 AI Interaction Guidelines
+- **Global Constraints:** This repository inherits all **FORBIDDEN OPERATIONS** (rm, ssh, sudo) and **CODE STYLE GUIDELINES** (Japanese language, Conventional Commits) defined in the root [AGENTS.md](https://github.com/yohi/dotfiles-core/blob/master/AGENTS.md).
 - **Context Awareness:** Always check if a configuration change belongs here (UI/Editor) or in `dotfiles-ai` (AI logic/MCP).
 - **Architectural Compliance:** All modifications must adhere to the layout defined in the central [ARCHITECTURE.md](https://github.com/yohi/dotfiles-core/blob/master/docs/ARCHITECTURE.md).
 - **Idempotency:** Ensure all setup scripts and Makefile targets are idempotent.
