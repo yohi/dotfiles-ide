@@ -13,8 +13,8 @@ include _mk/help.mk
 
 .PHONY: help install setup install-ide setup-ide
 
-install: install-ide ## IDE 関連のインストール
-setup: setup-ide ## IDE の設定適用
+install: install-ide
+setup: setup-ide
 
 install-ide:
 	@echo "==> Installing dotfiles-ide"
