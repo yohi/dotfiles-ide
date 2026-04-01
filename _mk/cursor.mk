@@ -98,9 +98,14 @@ _cursor_download:
 		fi; \
 		if [ "$$VALID_DOWNLOAD" -eq 1 ]; then \
 			echo "📦 パッケージをインストール中..."; \
-			sudo apt-get update && sudo apt-get install -y ./cursor.deb; \
-			rm -f cursor.deb; \
-			exit 0; \
+			if sudo apt-get update && sudo apt-get install -y ./cursor.deb; then \
+				rm -f cursor.deb; \
+				exit 0; \
+			else \
+				echo "❌ パッケージのインストールに失敗しました"; \
+				rm -f cursor.deb; \
+				exit 1; \
+			fi; \
 		fi; \
 	fi; \
 	echo "❌ Cursor IDEのインストールに失敗しました"; \
@@ -115,7 +120,7 @@ update-cursor:
 	echo "🔍 現在のCursor IDEを確認中..." && \
 	if command -v cursor >/dev/null 2>&1; then \
 		echo "🔄 Cursor IDEの実行状況を確認中..." && \
-		if pgrep -f "cursor" >/dev/null 2>&1; then \
+		if pgrep -x "cursor" >/dev/null 2>&1; then \
 			echo "⚠️  Cursor IDEが実行中です。アップデートを続行するには、まずCursor IDEを終了してください。"; \
 			echo ""; \
 			echo "💡 自動的にCursor IDEを終了するには: make stop-cursor"; \
@@ -173,10 +178,15 @@ update-cursor:
 				exit 1; \
 			fi; \
 			echo "📦 パッケージをアップデート中..."; \
-			sudo apt-get update && sudo apt-get install -y ./cursor-new.deb; \
-			rm -f cursor-new.deb && \
-			CURSOR_UPDATED=true && \
-			echo "🎉 Cursor IDEのアップデートが完了しました"; \
+			if sudo apt-get update && sudo apt-get install -y ./cursor-new.deb; then \
+				rm -f cursor-new.deb && \
+				CURSOR_UPDATED=true && \
+				echo "🎉 Cursor IDEのアップデートが完了しました"; \
+			else \
+				echo "❌ パッケージのアップデートに失敗しました"; \
+				rm -f cursor-new.deb; \
+				exit 1; \
+			fi; \
 		else \
 			echo "❌ ダウンロードに失敗しました"; \
 		fi; \
@@ -197,24 +207,24 @@ stop-cursor:
 	@echo "🛑 Cursor IDEを停止しています..."
 	@CURSOR_RUNNING=false && \
 	\
-	if pgrep -f "cursor" >/dev/null 2>&1; then \
+	if pgrep -x "cursor" >/dev/null 2>&1; then \
 		CURSOR_RUNNING=true; \
 		echo "📋 実行中のCursor関連プロセスを終了中..."; \
 		\
 		echo "🔄 Cursor IDEの優雅な終了を試行中..."; \
-		pkill -TERM -f "cursor" 2>/dev/null; \
+		pkill -TERM -x "cursor" 2>/dev/null; \
 		sleep 3; \
 		\
-		if pgrep -f "cursor" >/dev/null 2>&1; then \
+		if pgrep -x "cursor" >/dev/null 2>&1; then \
 			echo "⚠️  一部のプロセスが残っています。強制終了中..."; \
-			pkill -9 -f "cursor" 2>/dev/null; \
+			pkill -9 -x "cursor" 2>/dev/null; \
 			sleep 2; \
 		fi; \
 		\
-		if pgrep -f "cursor" >/dev/null 2>&1; then \
+		if pgrep -x "cursor" >/dev/null 2>&1; then \
 			echo "⚠️  まだ一部のプロセスが残っています"; \
 			echo "📋 残存プロセス:"; \
-			pgrep -af "cursor" | head -5; \
+			pgrep -ax "cursor" | head -5; \
 		else \
 			echo "✅ 全てのCursor関連プロセスを停止しました"; \
 		fi; \
