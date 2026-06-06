@@ -15,7 +15,7 @@ CURSOR_NO_VERIFY_HASH ?= true
 BYTES_TO_MB := 1048576
 
 # Cursor API URL
-CURSOR_API_URL := https://www.cursor.com/api/download?platform=linux-deb-x64&releaseTrack=stable
+CURSOR_API_URL := https://cursor.com/api/download?platform=linux-x64&releaseTrack=stable
 
 # Cursor IDEのインストール
 .PHONY: install-packages-cursor _cursor_download _cursor_link_settings \
@@ -60,9 +60,9 @@ _cursor_download:
 	API_RESPONSE=$$(curl -sL "$(CURSOR_API_URL)" 2>/dev/null); \
 	if [ -n "$$API_RESPONSE" ]; then \
 		if command -v jq >/dev/null 2>&1; then \
-			DOWNLOAD_URL=$$(echo "$$API_RESPONSE" | jq -r '.downloadUrl' 2>/dev/null); \
+			DOWNLOAD_URL=$$(echo "$$API_RESPONSE" | jq -r '.debUrl' 2>/dev/null); \
 		else \
-			DOWNLOAD_URL=$$(echo "$$API_RESPONSE" | grep -o '"downloadUrl":"[^"]*"' | cut -d'"' -f4); \
+			DOWNLOAD_URL=$$(echo "$$API_RESPONSE" | grep -o '"debUrl":"[^"]*"' | cut -d'"' -f4); \
 		fi; \
 	fi; \
 	if [ -z "$$DOWNLOAD_URL" ] || [ "$$DOWNLOAD_URL" = "null" ]; then \
