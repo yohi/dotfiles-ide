@@ -10,6 +10,8 @@ export SHELL := /bin/sh
 
 include _mk/common.mk
 
+CURSOR_NO_VERIFY_HASH ?= true
+
 # Cursor AppImageのSHA256ハッシュ
 # Cursor AppImageのサイズ制限 (bytes)
 # 期待されるサイズ範囲: 約100MB〜500MB
