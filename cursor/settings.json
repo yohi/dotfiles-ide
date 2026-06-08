@@ -160,5 +160,6 @@
     "window.restoreWindows": "none",
     "diffEditor.ignoreTrimWhitespace": false,
     "window.confirmSaveUntitledWorkspace": false,
-    "cursor.composer.usageSummaryDisplay": "always"
+    "cursor.composer.usageSummaryDisplay": "always",
+    "window.autoDetectColorScheme": false
 }

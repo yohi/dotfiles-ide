@@ -13,5 +13,10 @@
         "key": "escape",
         "command": "workbench.action.terminal.moveToBackground",
         "when": "terminalFocus && terminalProcessSupported"
+    },
+    {
+        "key": "ctrl+alt+s",
+        "command": "workbench.action.toggleUnifiedSidebarFromKeyboard",
+        "when": "!isAuxiliaryWindowFocusedContext"
     }
 ]
