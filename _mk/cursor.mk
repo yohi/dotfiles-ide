@@ -10,7 +10,7 @@ export SHELL := /bin/sh
 
 include _mk/common.mk
 
-CURSOR_NO_VERIFY_HASH ?= true
+CURSOR_NO_VERIFY_HASH ?= false
 # MB換算用定数 (1024 * 1024)
 BYTES_TO_MB := 1048576
 
@@ -132,29 +132,28 @@ update-cursor:
 		rm -f cursor-new.deb 2>/dev/null && \
 		\
 		echo "🌐 Cursor APIから最新バージョン情報を取得中..." && \
-		if command -v jq >/dev/null 2>&1; then \
-			API_RESPONSE=$$(curl -sL "$(CURSOR_API_URL)" 2>/dev/null); \
-			if [ -n "$$API_RESPONSE" ] && echo "$$API_RESPONSE" | jq . >/dev/null 2>&1; then \
-				DOWNLOAD_URL=$$(echo "$$API_RESPONSE" | jq -r '.downloadUrl' 2>/dev/null); \
-				VERSION=$$(echo "$$API_RESPONSE" | jq -r '.version' 2>/dev/null); \
-				if [ "$$DOWNLOAD_URL" != "null" ] && [ "$$DOWNLOAD_URL" != "" ]; then \
-					echo "📋 最新バージョン: $$VERSION"; \
-					echo "🔗 ダウンロードURL: $$DOWNLOAD_URL"; \
-				else \
-					DOWNLOAD_URL=""; \
-				fi; \
-			else \
-				echo "⚠️  API応答の解析に失敗しました。フォールバック方式を使用します..."; \
-				DOWNLOAD_URL=""; \
-			fi; \
+		API_RESPONSE=$$(curl -sL "$(CURSOR_API_URL)" 2>/dev/null); \
+		if [ -n "$$API_RESPONSE" ]; then \
+		        if command -v jq >/dev/null 2>&1; then \
+		                DOWNLOAD_URL=$$(echo "$$API_RESPONSE" | jq -r '.debUrl' 2>/dev/null); \
+		                VERSION=$$(echo "$$API_RESPONSE" | jq -r '.version' 2>/dev/null); \
+		                if [ "$$DOWNLOAD_URL" != "null" ] && [ "$$DOWNLOAD_URL" != "" ]; then \
+		                        echo "📋 最新バージョン: $$VERSION"; \
+		                        echo "🔗 ダウンロードURL: $$DOWNLOAD_URL"; \
+		                else \
+		                        DOWNLOAD_URL=""; \
+		                fi; \
+		        else \
+		                DOWNLOAD_URL=$$(echo "$$API_RESPONSE" | grep -o '"debUrl":"[^"]*"' | cut -d'"' -f4); \
+		        fi; \
 		else \
-			echo "⚠️  jqがインストールされていないため、フォールバック方式を使用します..."; \
-			DOWNLOAD_URL=""; \
+		        echo "⚠️  API応答の取得に失敗しました。フォールバック方式を使用します..."; \
+		        DOWNLOAD_URL=""; \
 		fi && \
 		\
-		if [ -z "$$DOWNLOAD_URL" ]; then \
-			echo "🔄 フォールバック: 直接ダウンロードを試行中..."; \
-			DOWNLOAD_URL="https://downloader.cursor.sh/linux/deb/x64"; \
+		if [ -z "$$DOWNLOAD_URL" ] || [ "$$DOWNLOAD_URL" = "null" ]; then \
+		        echo "🔄 フォールバック: 直接ダウンロードを試行中..."; \
+		        DOWNLOAD_URL="https://downloader.cursor.sh/linux/deb/x64"; \
 		fi && \
 		\
 		echo "📥 ダウンロード中: $$DOWNLOAD_URL" && \
