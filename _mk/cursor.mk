@@ -15,7 +15,12 @@ CURSOR_NO_VERIFY_HASH ?= false
 BYTES_TO_MB := 1048576
 
 # Cursor API URL
-CURSOR_API_URL := https://cursor.com/api/download?platform=linux-x64&releaseTrack=stable
+ifeq ($(OS_NAME),Darwin)
+    CURSOR_PLATFORM := macos-x64
+else
+    CURSOR_PLATFORM := linux-x64
+endif
+CURSOR_API_URL := https://cursor.com/api/download?platform=$(CURSOR_PLATFORM)&releaseTrack=stable
 
 # Cursor IDEのインストール
 .PHONY: install-packages-cursor _cursor_download _cursor_link_settings \
@@ -53,35 +58,52 @@ _cursor_link_settings:
 	@echo "✅ Cursor設定のリンクが完了しました"
 
 _cursor_download:
-	@echo "📦 最新のCursor .debパッケージをダウンロード中..."
-	@cd /tmp && \
+	@echo "📦 最新のCursorパッケージをダウンロード中..."
+	@TMP_DIR=$$(mktemp -d) && \
+	trap 'rm -rf "$$TMP_DIR"' EXIT && \
+	cd "$$TMP_DIR" && \
 	echo "🌐 最新のダウンロード情報を取得中..." && \
 	DOWNLOAD_URL=""; \
 	API_RESPONSE=$$(curl -sL "$(CURSOR_API_URL)" 2>/dev/null); \
 	if [ -n "$$API_RESPONSE" ]; then \
-	        if command -v jq >/dev/null 2>&1; then \
-	                DOWNLOAD_URL=$$(echo "$$API_RESPONSE" | jq -r '.debUrl' 2>/dev/null); \
+	        if [ "$(OS_NAME)" = "Darwin" ]; then \
+	                if command -v jq >/dev/null 2>&1; then \
+	                        DOWNLOAD_URL=$$(echo "$$API_RESPONSE" | jq -r '.dmgUrl' 2>/dev/null); \
+	                else \
+	                        DOWNLOAD_URL=$$(echo "$$API_RESPONSE" | grep -o '"dmgUrl":"[^"]*"' | cut -d'"' -f4); \
+	                fi; \
+	                PKG_FILE="cursor.dmg"; \
 	        else \
-	                DOWNLOAD_URL=$$(echo "$$API_RESPONSE" | grep -o '"debUrl":"[^"]*"' | cut -d'"' -f4); \
+	                if command -v jq >/dev/null 2>&1; then \
+	                        DOWNLOAD_URL=$$(echo "$$API_RESPONSE" | jq -r '.debUrl' 2>/dev/null); \
+	                else \
+	                        DOWNLOAD_URL=$$(echo "$$API_RESPONSE" | grep -o '"debUrl":"[^"]*"' | cut -d'"' -f4); \
+	                fi; \
+	                PKG_FILE="cursor.deb"; \
 	        fi; \
 	fi; \
 	if [ -z "$$DOWNLOAD_URL" ] || [ "$$DOWNLOAD_URL" = "null" ]; then \
 	        echo "⚠️  APIからのURL取得に失敗しました。フォールバックを使用します..."; \
-	        DOWNLOAD_URL="https://downloader.cursor.sh/linux/deb/x64"; \
+	        if [ "$(OS_NAME)" = "Darwin" ]; then \
+	                DOWNLOAD_URL="https://downloader.cursor.sh/mac/dmg/x64"; \
+	                PKG_FILE="cursor.dmg"; \
+	        else \
+	                DOWNLOAD_URL="https://downloader.cursor.sh/linux/deb/x64"; \
+	                PKG_FILE="cursor.deb"; \
+	        fi; \
 	fi; \
 	echo "📥 ダウンロード中: $$DOWNLOAD_URL" && \
 	if curl -L --user-agent "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36" \
 	        --max-time 120 --retry 2 --retry-delay 3 \
-	        -o cursor.deb "$$DOWNLOAD_URL" 2>/dev/null; then \
+	        -o "$$PKG_FILE" "$$DOWNLOAD_URL" 2>/dev/null; then \
 	        echo "🔐 ダウンロードファイルの整合性を検証中 (SHA256)..."; \
-	        ACTUAL_HASH=$$( $(SHA256_CMD) cursor.deb | awk '{print $$1}'); \
+	        ACTUAL_HASH=$$( $(SHA256_CMD) "$$PKG_FILE" | awk '{print $$1}'); \
 	        VALID_DOWNLOAD=0; \
 	        if [ -n "$(CURSOR_SHA256)" ]; then \
 	                if [ "$$ACTUAL_HASH" != "$(CURSOR_SHA256)" ]; then \
 	                        echo "❌ ハッシュ不一致エラー"; \
 	                        echo "   期待値: $(CURSOR_SHA256)"; \
 	                        echo "   実際値: $$ACTUAL_HASH"; \
-	                        rm -f cursor.deb; \
 	                        exit 1; \
 	                else \
 	                        echo "✅ ハッシュ検証に成功しました"; \
@@ -94,18 +116,25 @@ _cursor_download:
 	                echo "❌ エラー: CURSOR_SHA256 が設定されていません"; \
 	                echo "   セキュリティポリシーにより、整合性検証のないインストールはブロックされます。"; \
 	                echo "   CURSOR_NO_VERIFY_HASH=true でスキップできます。"; \
-	                rm -f cursor.deb; \
 	                exit 1; \
 	        fi; \
 	        if [ "$$VALID_DOWNLOAD" -eq 1 ]; then \
 	                echo "📦 パッケージをインストール中..."; \
-	                if sudo apt-get update && sudo apt-get install -y ./cursor.deb; then \
-	                        rm -f cursor.deb; \
-	                        exit 0; \
+	                if [ "$(OS_NAME)" = "Darwin" ]; then \
+	                        if command -v brew >/dev/null 2>&1; then \
+	                                brew install --cask cursor; \
+	                        else \
+	                                echo "⚠️  macOSではHomebrewを推奨します。dmgファイルをマウントしてインストールしてください。"; \
+	                                echo "   ファイルパス: $$TMP_DIR/$$PKG_FILE"; \
+	                                exit 1; \
+	                        fi; \
 	                else \
-	                        echo "❌ パッケージのインストールに失敗しました"; \
-	                        rm -f cursor.deb; \
-	                        exit 1; \
+	                        if sudo apt-get update && sudo apt-get install -y "./$$PKG_FILE"; then \
+	                                exit 0; \
+	                        else \
+	                                echo "❌ パッケージのインストールに失敗しました"; \
+	                                exit 1; \
+	                        fi; \
 	                fi; \
 	        fi; \
 	fi; \
@@ -128,18 +157,31 @@ update-cursor:
 	                exit 1; \
 	        fi && \
 	        echo "📦 最新バージョンのダウンロード情報を取得中..." && \
-	        cd /tmp && \
-	        rm -f cursor-new.deb 2>/dev/null && \
+	        TMP_DIR=$$(mktemp -d) && \
+	        trap 'rm -rf "$$TMP_DIR"' EXIT && \
+	        cd "$$TMP_DIR" && \
 	        \
 	        echo "🌐 Cursor APIから最新バージョン情報を取得中..." && \
 	        API_RESPONSE=$$(curl -sL "$(CURSOR_API_URL)" 2>/dev/null); \
 	        if [ -n "$$API_RESPONSE" ]; then \
-	                if command -v jq >/dev/null 2>&1; then \
-	                        DOWNLOAD_URL=$$(echo "$$API_RESPONSE" | jq -r '.debUrl' 2>/dev/null); \
-	                        VERSION=$$(echo "$$API_RESPONSE" | jq -r '.version' 2>/dev/null); \
+	                if [ "$(OS_NAME)" = "Darwin" ]; then \
+	                        if command -v jq >/dev/null 2>&1; then \
+	                                DOWNLOAD_URL=$$(echo "$$API_RESPONSE" | jq -r '.dmgUrl' 2>/dev/null); \
+	                                VERSION=$$(echo "$$API_RESPONSE" | jq -r '.version' 2>/dev/null); \
+	                        else \
+	                                DOWNLOAD_URL=$$(echo "$$API_RESPONSE" | grep -o '"dmgUrl":"[^"]*"' | cut -d'"' -f4); \
+	                                VERSION=$$(echo "$$API_RESPONSE" | grep -o '"version":"[^"]*"' | cut -d'"' -f4); \
+	                        fi; \
+	                        PKG_FILE="cursor-new.dmg"; \
 	                else \
-	                        DOWNLOAD_URL=$$(echo "$$API_RESPONSE" | grep -o '"debUrl":"[^"]*"' | cut -d'"' -f4); \
-	                        VERSION=$$(echo "$$API_RESPONSE" | grep -o '"version":"[^"]*"' | cut -d'"' -f4); \
+	                        if command -v jq >/dev/null 2>&1; then \
+	                                DOWNLOAD_URL=$$(echo "$$API_RESPONSE" | jq -r '.debUrl' 2>/dev/null); \
+	                                VERSION=$$(echo "$$API_RESPONSE" | jq -r '.version' 2>/dev/null); \
+	                        else \
+	                                DOWNLOAD_URL=$$(echo "$$API_RESPONSE" | grep -o '"debUrl":"[^"]*"' | cut -d'"' -f4); \
+	                                VERSION=$$(echo "$$API_RESPONSE" | grep -o '"version":"[^"]*"' | cut -d'"' -f4); \
+	                        fi; \
+	                        PKG_FILE="cursor-new.deb"; \
 	                fi; \
 	                if [ "$$DOWNLOAD_URL" != "null" ] && [ "$$DOWNLOAD_URL" != "" ]; then \
 	                        echo "📋 最新バージョン: $$VERSION"; \
@@ -154,39 +196,51 @@ update-cursor:
 	        \
 	        if [ -z "$$DOWNLOAD_URL" ] || [ "$$DOWNLOAD_URL" = "null" ]; then \
 	                echo "🔄 フォールバック: 直接ダウンロードを試行中..."; \
-	                DOWNLOAD_URL="https://downloader.cursor.sh/linux/deb/x64"; \
+	                if [ "$(OS_NAME)" = "Darwin" ]; then \
+	                        DOWNLOAD_URL="https://downloader.cursor.sh/mac/dmg/x64"; \
+	                        PKG_FILE="cursor-new.dmg"; \
+	                else \
+	                        DOWNLOAD_URL="https://downloader.cursor.sh/linux/deb/x64"; \
+	                        PKG_FILE="cursor-new.deb"; \
+	                fi; \
 	        fi && \
 	        \
 	        echo "📥 ダウンロード中: $$DOWNLOAD_URL" && \
 	        if curl -L --user-agent "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36" \
 	                --max-time 120 --retry 3 --retry-delay 5 \
-	                -o cursor-new.deb "$$DOWNLOAD_URL" 2>/dev/null; then \
+	                -o "$$PKG_FILE" "$$DOWNLOAD_URL" 2>/dev/null; then \
 	                echo "🔐 ダウンロードファイルの整合性を検証中 (SHA256)..."; \
-	                ACTUAL_HASH=$$( $(SHA256_CMD) cursor-new.deb | awk '{print $$1}'); \
+	                ACTUAL_HASH=$$( $(SHA256_CMD) "$$PKG_FILE" | awk '{print $$1}'); \
 	                if [ -n "$(CURSOR_SHA256)" ]; then \
 	                        if [ "$$ACTUAL_HASH" != "$(CURSOR_SHA256)" ]; then \
 	                                echo "❌ ハッシュ不一致エラー"; \
 	                                echo "   期待値: $(CURSOR_SHA256)"; \
 	                                echo "   実際値: $$ACTUAL_HASH"; \
-	                                rm -f cursor-new.deb; \
 	                                exit 1; \
 	                        fi; \
 	                elif [ "$(CURSOR_NO_VERIFY_HASH)" != "true" ]; then \
 	                        echo "❌ エラー: CURSOR_SHA256 が設定されていません"; \
 	                        echo "   セキュリティポリシーにより、整合性検証のないアップデートはブロックされます。"; \
 	                        echo "   CURSOR_NO_VERIFY_HASH=true でスキップできます。"; \
-	                        rm -f cursor-new.deb; \
 	                        exit 1; \
 	                fi; \
 	                echo "📦 パッケージをアップデート中..."; \
-	                if sudo apt-get update && sudo apt-get install -y ./cursor-new.deb; then \
-	                        rm -f cursor-new.deb && \
-	                        CURSOR_UPDATED=true && \
-	                        echo "🎉 Cursor IDEのアップデートが完了しました"; \
+	                if [ "$(OS_NAME)" = "Darwin" ]; then \
+	                        if command -v brew >/dev/null 2>&1; then \
+	                                brew upgrade --cask cursor; \
+	                        else \
+	                                echo "⚠️  macOSではHomebrewを推奨します。dmgファイルをマウントしてインストールしてください。"; \
+	                                echo "   ファイルパス: $$TMP_DIR/$$PKG_FILE"; \
+	                                exit 1; \
+	                        fi; \
 	                else \
-	                        echo "❌ パッケージのアップデートに失敗しました"; \
-	                        rm -f cursor-new.deb; \
-	                        exit 1; \
+	                        if sudo apt-get update && sudo apt-get install -y "./$$PKG_FILE"; then \
+	                                CURSOR_UPDATED=true && \
+	                                echo "🎉 Cursor IDEのアップデートが完了しました"; \
+	                        else \
+	                                echo "❌ パッケージのアップデートに失敗しました"; \
+	                                exit 1; \
+	                        fi; \
 	                fi; \
 	        else \
 	                echo "❌ ダウンロードに失敗しました"; \
@@ -196,7 +250,7 @@ update-cursor:
 	        echo "   'make install-packages-cursor' でインストールしてください"; \
 	fi && \
 	\
-	if [ "$$CURSOR_UPDATED" = "false" ]; then \
+	if [ "$$CURSOR_UPDATED" = "false" ] && [ "$(OS_NAME)" != "Darwin" ]; then \
 	        echo "💡 手動アップデート手順:"; \
 	        echo "1. ブラウザで https://www.cursor.com/ を開く"; \
 	        echo "2. 'Download for Linux (.deb)' をクリック"; \
